@@ -1,8 +1,5 @@
 import random
 
-#Nota o programa atual contêm um bug, que nos casos raros em que é necessário 
-#mais que nove peças para o lixo, não consegue decidir onde colocar e da erro
-
 #definicao de classes
 class Celula:
     def __init__(self, reservedValue, isReserved, isTrash):
@@ -74,11 +71,11 @@ posicoes_lixo = [(0, 1), (0, 3), (0, 4), (1, 0), (1, 2), (1, 3), (2, 1), (4, 2),
 def main():
     iniciarTabuleiro()
     gerarFilaRandom() 
-    definir_simbolo_util()
+    #definir_simbolo_util()      será necessário para a formação de macrofiguras, mas por enquanto não
     jogar()
     exibir_tabuleiro()
     calcularScoreFinal()
-    print(score)
+    print(f"Score: {score}")
     return 0    
 
 
@@ -160,22 +157,22 @@ def jogar():
     contadores_tabuleiro = [0, 0, 0, 0, 0]  # [contador_x, contador_o, contador_cruz, contador_traco, contador_lixo]
 
     while(len(lista_simbolos) > 0):
-        if not lista_simbolos[0].isTrash:
-            if lista_simbolos[0].value == x:
-                tabuleiro[(posicoes_x[contadores_tabuleiro[0]][0])][(posicoes_x[contadores_tabuleiro[0]][1])].value = x
-                contadores_tabuleiro[0] += 1
-            elif lista_simbolos[0].value == bola:
-                tabuleiro[(posicoes_o[contadores_tabuleiro[1]][0])][(posicoes_o[contadores_tabuleiro[1]][1])].value = bola
-                contadores_tabuleiro[1] += 1
-            elif lista_simbolos[0].value == cruz:
-                tabuleiro[(posicoes_cruz[contadores_tabuleiro[2]][0])][(posicoes_cruz[contadores_tabuleiro[2]][1])].value = cruz
-                contadores_tabuleiro[2] += 1
-            elif lista_simbolos[0].value == traco:
-                tabuleiro[(posicoes_traco[contadores_tabuleiro[3]][0])][(posicoes_traco[contadores_tabuleiro[3]][1])].value = traco
-                contadores_tabuleiro[3] += 1
-        else:
-            tabuleiro[(posicoes_lixo[contadores_tabuleiro[4]][0])][(posicoes_lixo[contadores_tabuleiro[4]][1])].value = lista_simbolos[0].value
-            contadores_tabuleiro[4] += 1
+        #if not lista_simbolos[0].isTrash:
+        if lista_simbolos[0].value == x:
+            tabuleiro[(posicoes_x[contadores_tabuleiro[0]][0])][(posicoes_x[contadores_tabuleiro[0]][1])].value = x
+            contadores_tabuleiro[0] += 1
+        elif lista_simbolos[0].value == bola:
+            tabuleiro[(posicoes_o[contadores_tabuleiro[1]][0])][(posicoes_o[contadores_tabuleiro[1]][1])].value = bola
+            contadores_tabuleiro[1] += 1
+        elif lista_simbolos[0].value == cruz:
+            tabuleiro[(posicoes_cruz[contadores_tabuleiro[2]][0])][(posicoes_cruz[contadores_tabuleiro[2]][1])].value = cruz
+            contadores_tabuleiro[2] += 1
+        elif lista_simbolos[0].value == traco:
+            tabuleiro[(posicoes_traco[contadores_tabuleiro[3]][0])][(posicoes_traco[contadores_tabuleiro[3]][1])].value = traco
+            contadores_tabuleiro[3] += 1
+        #else:
+        #    tabuleiro[(posicoes_lixo[contadores_tabuleiro[4]][0])][(posicoes_lixo[contadores_tabuleiro[4]][1])].value = lista_simbolos[0].value
+        #    contadores_tabuleiro[4] += 1
 
         lista_simbolos.pop(0)
         verificaFigura(contadores_tabuleiro)
