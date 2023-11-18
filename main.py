@@ -2,6 +2,17 @@ import random
 
 
 #definicao de classes
+class Jogo:
+    def __init__(self):
+        self.existe_macrox = False
+    
+    def setExiste_Macrox(self):
+        if(self.existe_macrox):
+            self.existe_macrox = False
+        else:
+            self.existe_macrox = True
+
+
 class Celula:
     def __init__(self, reservedValue, isReserved, isTrash):
         self.value = " "
@@ -47,8 +58,10 @@ class Simbolo:
         f"Inicio Macrofigura: {self.inicioMacrofigura}, "
         f"Fim Macrofigura: {self.fimMacrofigura}"
         )
-    
 
+
+#Define variavel jogo
+jogo = Jogo()
 
 #Define das variaveis iniciais
 total_simulacoes = 0        #score total das simulacoes todas
@@ -90,7 +103,7 @@ lista_simbolos = []
 #definir posicoes microfiguras
 posicoes_microfigura_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
 posicoes_microfigura_o = [(3, 0), (3, 1), (4, 0), (4, 1)]
-posicoes_microfigura_cruz = [(2, 3), (3, 2), (3, 3), (3, 4), (4, 3)]
+posicoes_microfigura_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
 posicoes_microfigura_traco = [(1, 4), (2, 4)]
 posicoes_lixo = [(0, 1), (0, 3), (0, 4), (1, 0), (1, 2), (1, 3), (2, 1), (4, 2), (4, 4)]
 
@@ -112,15 +125,7 @@ def main():
     global tabuleiro
     global tabuleiro_macrox
     global lista_simbolos
-
-    #gerarFilaRandom()
-    #verifica_macrofigura_x()
-    #iniciar_tabuleiro_microfiguras()
-    #iniciar_tabuleiro_macrox()
-    #jogar()
-    #exibir_tabuleiro(tabuleiro)
-    #copiar_valores_tabuleiro(tabuleiro, tabuleiro_macrox)
-    #exibir_tabuleiro(tabuleiro_macrox)
+    global jogo
 
     #definir_simbolo_util()      será necessário para a formação de macrofiguras, mas por enquanto não
 
@@ -129,8 +134,8 @@ def main():
         score = 0
         iniciar_tabuleiro(tabuleiro, posicoes_microfigura_x, posicoes_microfigura_o, posicoes_microfigura_cruz, posicoes_microfigura_traco)
         iniciar_tabuleiro(tabuleiro_macrox, posicoes_macrox_x, posicoes_macrox_bola, posicoes_macrox_cruz, posicoes_macrox_traco)
-        gerarFilaRandom(lista_simbolos) 
-        verifica_possiblidade_macrofigura_x()
+        gerarFilaRandom(lista_simbolos)
+        teste_ver_macrox()
         jogar()
         exibir_tabuleiro(tabuleiro)
         calcularScoreFinal()
@@ -144,73 +149,54 @@ def main():
 
 
 #----------------------------------------------------------------------------------------------------
-def verifica_condicoes_macrofigura_x(num_bola):
-    if(num_bola % micro_forma_0 > 2 and num_bola != 3):
-        return False
+# O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
+def teste_ver_macrox():
+    array_x = []
+    array_o = []
+    isImposible = False
+    continue_loop = True
 
-    return True
+    for index, i in enumerate(lista_simbolos):
+        if(i.value == x):
+            array_x.append(index)
+        elif(i.value == bola):
+            array_o.append(index)
+    
 
-
-def verifica_possiblidade_macrofigura_x():
-    numero_x = 0
-
-    #conta o número de ocorrências de x na lista
-    for i in lista_simbolos:
-        if (i.value == x):
-            numero_x += 1
-
-    #caso seja maior que 9 pode continuar a verificar
-    if(numero_x < 9):
-        return
-
-    #enquanto do primeiro x ao ulitmo ainda existam x possiveis para formar uma macrofigura
-    while(numero_x >= 9):
-        condicao_completa = False
-        numero_bola = 0
-        contador_x_ate_final = 0
-        posicao_x_inicial = -1 #posição do primeiro x da macrofigura
-        posicao_x_final = -1 #posicao do x final da macro figura
-        posicao_temp = -1 #posicao do seguinte a ser inicial caso o primeiro falhe
-
-        for index, i in enumerate(lista_simbolos):
-            if i.value == x:
-                contador_x_ate_final += 1
-                if(posicao_x_inicial == -1):
-                    posicao_x_inicial = index
-                if (contador_x_ate_final % 6 == 0):
-                    posicao_temp = index  # Store the current index
-
-            if i.value == bola:
-                numero_bola += 1
-
-
-            # If at least 9 figures have passed since the first x
-            if contador_x_ate_final == 9:
-                posicao_x_final = index
-                if (verifica_condicoes_macrofigura_x(numero_bola)):
-                    lista_simbolos[posicao_x_inicial].setInicioMacrofigura()
-                    lista_simbolos[posicao_x_final].setFimMacrofigura()
-                    condicao_completa = True
-                    break
-                else:
-                    posicao_x_inicial = posicao_temp
-                    contador_x_ate_final -= micro_forma_x
-                    numero_x -= micro_forma_x
+    while(len(array_x) >= 9):
+        contador_bola_antes_espaco_critico = 0
+        contador_bola_depois_espaco_critico = 0
         
-        if(condicao_completa):
+        #verifica antes do espaço critico quantas bolas tem
+        while(array_x[5] > array_o[contador_bola_antes_espaco_critico]):
+            contador_bola_antes_espaco_critico += 1
+            #caso não existam mais bolas para verificar
+            if((contador_bola_antes_espaco_critico) == len(array_o)):
+                continue_loop = False
+                break
+        
+        if(contador_bola_antes_espaco_critico % 4 > 2):
+            isImposible = True
+
+        #verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite    
+        if(continue_loop):
+            while((array_x[8] > array_o[contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico])):
+                contador_bola_depois_espaco_critico += 1
+                #caso não existam mais bolas para verificar
+                if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) == (len(array_o))):
+                    break
+
+        if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) > 2):
+            isImposible = True
+
+
+        if(isImposible):
+            array_x = array_x[5:]
+        else:
+            lista_simbolos[array_x[0]].setInicioMacrofigura()
+            lista_simbolos[array_x[8]].setFimMacrofigura()
+            jogo.setExiste_Macrox()
             break
-
-
-#verifica se existe uma figura macro_x no tabuleiro
-def verifica_figura_macrox(lista_contadores, tabuleiro):
-    global score
-
-    if(lista_contadores[0] == macro_forma_x):
-        score += score_macro_x
-        while(lista_contadores[0] != 0):
-                lista_contadores[0] -= 1
-                tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][(posicoes_macrox_x[lista_contadores[0]][1])].value = " "
-
 #---------------------------------------------------------------------------------------------
 
 
@@ -308,17 +294,17 @@ def jogar_macrofigurax(tabuleiro_Origem, tabuleiro_Destino, contador_tabuleiro):
             tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value = x
             contador_tabuleiro[0] += 1
         elif lista_simbolos[0].value == bola:
-            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+            if(tabuleiro_Destino[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])].value != " "):
                 exit(1)
             tabuleiro_Destino[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])].value = bola
             contador_tabuleiro[1] += 1
         elif lista_simbolos[0].value == cruz:
-            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+            if(tabuleiro_Destino[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])].value != " "):
                 exit(1)
             tabuleiro_Destino[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])].value = cruz
             contador_tabuleiro[2] += 1
         elif lista_simbolos[0].value == traco:
-            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+            if(tabuleiro_Destino[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])].value != " "):
                 exit(1)
             tabuleiro_Destino[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])].value = traco
             contador_tabuleiro[3] += 1
@@ -338,7 +324,7 @@ def jogar():
     contador_tabuleiro = [0, 0, 0, 0, 0]  # [contador_x, contador_o, contador_cruz, contador_traco, contador_lixo]
 
     while(len(lista_simbolos) > 0):
-        if(lista_simbolos[0].inicioMacrofigura):
+        if(jogo.existe_macrox): #se existir macrox jogar este
             jogar_macrofigurax(tabuleiro, tabuleiro_macrox, contador_tabuleiro)
         else:
             #procedimento normal para microfiguras
@@ -388,6 +374,19 @@ def verificaFigura(lista_contadores, tabuleiro, run_x):
         while(lista_contadores[3] != 0):
                 lista_contadores[3] -= 1
                 tabuleiro[(posicoes_microfigura_traco[lista_contadores[3]][0])][(posicoes_microfigura_traco[lista_contadores[3]][1])].value = " "
+
+
+#verifica se existe uma figura macro_x no tabuleiro
+def verifica_figura_macrox(lista_contadores, tabuleiro):
+    global score
+
+    if(lista_contadores[0] == macro_forma_x):
+        score += score_macro_x
+        while(lista_contadores[0] != 0):
+                lista_contadores[0] -= 1
+                tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][(posicoes_macrox_x[lista_contadores[0]][1])].value = " "
+        
+        jogo.setExiste_Macrox()
 
 
 #funcao para retirar o score das pecas ainda no tabuleiro
