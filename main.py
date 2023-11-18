@@ -96,7 +96,7 @@ posicoes_lixo = [(0, 1), (0, 3), (0, 4), (1, 0), (1, 2), (1, 3), (2, 1), (4, 2),
 
 
 #definir posicoes macrofigura_X
-posicoes_macrox_x = [(0,0), (0, 4), (1,1), (1,3), (2,2), (3,1), (4,0), (4,4), (3,3)]
+posicoes_macrox_x = [(0,0), (0, 4), (1,1), (1,3), (2,2), (4,4), (3,1), (4,0), (3,3)]
 posicoes_macrox_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
 posicoes_macrox_bola = [(3,0), (4,1), (3,1), (4,0)]
 posicoes_macrox_traco = [(1,4), (2,4)]
@@ -177,12 +177,12 @@ def verifica_possiblidade_macrofigura_x():
                 contador_x_ate_final += 1
                 if(posicao_x_inicial == -1):
                     posicao_x_inicial = index
+                if (contador_x_ate_final % 6 == 0):
+                    posicao_temp = index  # Store the current index
 
             if i.value == bola:
                 numero_bola += 1
 
-            if contador_x_ate_final % 5 == 0:
-                posicao_temp = index  # Store the current index
 
             # If at least 9 figures have passed since the first x
             if contador_x_ate_final == 9:
@@ -193,11 +193,9 @@ def verifica_possiblidade_macrofigura_x():
                     condicao_completa = True
                     break
                 else:
-                    #posicao_x_inicial = posicao_temp
-                    #contador_x_ate_final -= micro_forma_x
-                    #numero_x -= micro_forma_x
-                    condicao_completa = True
-                    break
+                    posicao_x_inicial = posicao_temp
+                    contador_x_ate_final -= micro_forma_x
+                    numero_x -= micro_forma_x
         
         if(condicao_completa):
             break
@@ -303,17 +301,25 @@ def jogar_macrofigurax(tabuleiro_Origem, tabuleiro_Destino, contador_tabuleiro):
     copiar_valores_tabuleiro(tabuleiro_Origem, tabuleiro_Destino)
 
     while(lista_simbolos[0].fimMacrofigura != True):
-        #procedimento normal para microfiguras
+        #procedimento normal para macrofigura_x
         if lista_simbolos[0].value == x:
+            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+                exit(1)
             tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value = x
             contador_tabuleiro[0] += 1
         elif lista_simbolos[0].value == bola:
+            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+                exit(1)
             tabuleiro_Destino[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])].value = bola
             contador_tabuleiro[1] += 1
         elif lista_simbolos[0].value == cruz:
+            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+                exit(1)
             tabuleiro_Destino[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])].value = cruz
             contador_tabuleiro[2] += 1
         elif lista_simbolos[0].value == traco:
+            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
+                exit(1)
             tabuleiro_Destino[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])].value = traco
             contador_tabuleiro[3] += 1
         
