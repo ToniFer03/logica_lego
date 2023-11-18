@@ -13,24 +13,6 @@ class Jogo:
             self.existe_macrox = True
 
 
-class Celula:
-    def __init__(self, reservedValue, isReserved, isTrash):
-        self.value = " "
-        self.reservedValue = reservedValue
-        self.isReserved = isReserved
-        self.isTrash = isTrash
-        self.isBlocked = False
-
-    def __str__(self):
-        return (
-        f"Valor: {self.value}, "
-        f"Valor Reservado: {self.reservedValue}, "
-        f"Reservada: {self.isReserved}, "
-        f"Lixo: {self.isTrash}, "
-        f"Bloqueada: {self.isBlocked}"
-        )
-
-
 class Simbolo:
     def __init__(self, value):
         self.value = value
@@ -68,6 +50,9 @@ total_simulacoes = 0        #score total das simulacoes todas
 numero_simulacoes = 0       #numero simulacoes realizadas
 media = 0                   #media das simulacoes
 score = 0                   #score do jogo
+
+
+#Definição dos scores para cada forma
 score_micro_bola = 16       #score por completar uma bola
 score_micro_x = 32          #score por completar uma x
 score_micro_cruz = 32       #score por completar uma cruz
@@ -94,61 +79,60 @@ macro_forma_x = 9
 
 
 # Criar um tabuleiro vazio
-tabuleiro = [[' ' for _ in range(5)] for _ in range(5)]
-tabuleiro_macrox = [[' ' for _ in range(5)] for _ in range(5)]
+tabuleiro = []
 
 #cria lista de espera
 lista_simbolos = []
 
-#definir posicoes microfiguras
-posicoes_microfigura_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-posicoes_microfigura_o = [(3,0), (4,1), (3,1), (4,0)]
-posicoes_microfigura_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
-posicoes_microfigura_traco = [(1, 4), (2, 4)]
-posicoes_lixo = [(0, 1), (0, 3), (0, 4), (1, 0), (1, 2), (1, 3), (2, 1), (4, 2), (4, 4)]
+posicao_x_uso = []
+posicao_bola_uso = []
+posicao_cruz_uso = []
+posicao_traco_uso = []
 
+#Posições base
+#posicoes_base_bola = [(3,0), (3,1), (4,0), (4,1)]          Estão na ordem original
+#posicoes_base_cruz = [(2,3), (3,2), (3,3), (3,4), (4,3)]   Estão na ordem original
+posicoes_base_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
+posicoes_base_bola = [(3,0), (4,1), (3,1), (4,0)]
+posicoes_base_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
+posicoes_base_traco = [(1, 4), (2, 4)]
 
-#definir posicoes macrofigura_X
+#Posicoes caso macrox
 posicoes_macrox_x = [(0,0), (0, 4), (1,1), (1,3), (2,2), (4,4), (3,1), (4,0), (3,3)]
-posicoes_macrox_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
 posicoes_macrox_bola = [(3,0), (4,1), (3,1), (4,0)]
+posicoes_macrox_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
 posicoes_macrox_traco = [(1,4), (2,4)]
 
 
 
 
-#definicao de funcoes
+# Definição de funções
 def main():
     global numero_simulacoes
     global total_simulacoes
     global score
     global tabuleiro
-    global tabuleiro_macrox
     global lista_simbolos
     global jogo
 
     #definir_simbolo_util()      será necessário para a formação de macrofiguras, mas por enquanto não
 
 
-    while(numero_simulacoes < 1000000):
+    while(numero_simulacoes < 100000):
         score = 0
-        iniciar_tabuleiro(tabuleiro, posicoes_microfigura_x, posicoes_microfigura_o, posicoes_microfigura_cruz, posicoes_microfigura_traco)
-        iniciar_tabuleiro(tabuleiro_macrox, posicoes_macrox_x, posicoes_macrox_bola, posicoes_macrox_cruz, posicoes_macrox_traco)
+        tabuleiro = [[ " " for _ in range(5)] for _ in range(5)]
         gerarFilaRandom(lista_simbolos)
         teste_ver_macrox()
         jogar()
-        exibir_tabuleiro(tabuleiro)
         calcularScoreFinal()
-        print(f"Score: {score} ---- Numero simulações: {numero_simulacoes}")
         numero_simulacoes += 1
         total_simulacoes += score
     media = total_simulacoes / numero_simulacoes
-    print(f"A media de score desta versão é de {media}")
+    print(f"A media de score desta versão é de {media} | Numero de simulacoes: {numero_simulacoes}")
     return 0    
 
 
 
-#----------------------------------------------------------------------------------------------------
 # O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
 def teste_ver_macrox():
     array_x = []
@@ -199,8 +183,6 @@ def teste_ver_macrox():
             lista_simbolos[array_x[8]].setFimMacrofigura()
             jogo.setExiste_Macrox()
             break
-#---------------------------------------------------------------------------------------------
-
 
 
 #funcao para gerar uma lista ao calhas de simbolos
@@ -212,38 +194,6 @@ def gerarFilaRandom(lista_simbolos):
     for _ in range(tamanho_lista):
         simbolo_aleatorio = Simbolo(random.choice([cruz, x, bola, traco]))
         lista_simbolos.append(simbolo_aleatorio)
-
-
-#funcao para iniciar o tabuleiro
-def iniciar_tabuleiro(tabuleiro, posicoes_x, posicoes_o, posicoes_cruz, posicoes_traco):
-    iniciacao_x = [x, True, False]
-    iniciacao_o = [bola, True, False]
-    iniciacao_cruz = [cruz, True, False]
-    iniciacao_traco = [traco, True, False]
-    iniciacao_lixo = [" ", False, True]
-
-
-    for i in range(len(tabuleiro)):
-        for j in range(len(tabuleiro[i])):
-            #Iniciação das posições x
-            if (i, j) in posicoes_x:
-                tabuleiro[i][j] = Celula(iniciacao_x[0], iniciacao_x[1], iniciacao_x[2])
-
-            #Iniciação das posições o
-            elif (i, j) in posicoes_o:
-                tabuleiro[i][j] = Celula(iniciacao_o[0], iniciacao_o[1], iniciacao_o[2])
-
-            #Iniciação das posicoes cruz
-            elif (i, j) in posicoes_cruz:
-                tabuleiro[i][j] = Celula(iniciacao_cruz[0], iniciacao_cruz[1], iniciacao_cruz[2])
-
-            #Iniciação das posicoes traco
-            elif (i, j) in posicoes_traco:
-                tabuleiro[i][j] = Celula(iniciacao_traco[0], iniciacao_traco[1], iniciacao_traco[2])
-
-            #Iniciação do resto das posicoes
-            else:
-                tabuleiro[i][j] = Celula(iniciacao_lixo[0], iniciacao_lixo[1], iniciacao_lixo[2])
 
 
 #funcao para definir se simbolo e util ou nao
@@ -285,40 +235,37 @@ def definir_simbolo_util():
             break
 
 
-def jogar_macrofigurax(tabuleiro_Origem, tabuleiro_Destino, contador_tabuleiro):
-    copiar_valores_tabuleiro(tabuleiro_Origem, tabuleiro_Destino)
+def jogar_macrofigurax(contador_tabuleiro):
 
     while(lista_simbolos[0].fimMacrofigura != True):
         #procedimento normal para macrofigura_x
         if lista_simbolos[0].value == x:
-            if(tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value != " "):
-                exit(1)
-            tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value = x
+            if(tabuleiro[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])] != " "):
+                exit("Erro, jogo normal, colocação do x onde já existia uma peça")
+            tabuleiro[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])] = x
             contador_tabuleiro[0] += 1
         elif lista_simbolos[0].value == bola:
-            if(tabuleiro_Destino[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])].value != " "):
-                exit(1)
-            tabuleiro_Destino[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])].value = bola
+            if(tabuleiro[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])] != " "):
+                exit("Erro, jogo normal, colocação da bola onde já existia uma peça")
+            tabuleiro[(posicoes_macrox_bola[contador_tabuleiro[1]][0])][(posicoes_macrox_bola[contador_tabuleiro[1]][1])] = bola
             contador_tabuleiro[1] += 1
         elif lista_simbolos[0].value == cruz:
-            if(tabuleiro_Destino[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])].value != " "):
-                exit(1)
-            tabuleiro_Destino[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])].value = cruz
+            if(tabuleiro[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])] != " "):
+                exit("Erro, jogo normal, colocação da cruz onde já existia uma peça")
+            tabuleiro[(posicoes_macrox_cruz[contador_tabuleiro[2]][0])][(posicoes_macrox_cruz[contador_tabuleiro[2]][1])] = cruz
             contador_tabuleiro[2] += 1
         elif lista_simbolos[0].value == traco:
-            if(tabuleiro_Destino[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])].value != " "):
-                exit(1)
-            tabuleiro_Destino[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])].value = traco
+            if(tabuleiro[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])] != " "):
+                exit("Erro, jogo normal, colocação do traco onde já existia uma peça")
+            tabuleiro[(posicoes_macrox_traco[contador_tabuleiro[3]][0])][(posicoes_macrox_traco[contador_tabuleiro[3]][1])] = traco
             contador_tabuleiro[3] += 1
         
         lista_simbolos.pop(0)
-        verificaFigura(contador_tabuleiro, tabuleiro_Destino, False)
+        verificaFigura(contador_tabuleiro, tabuleiro, False)
     
-    tabuleiro_Destino[(posicoes_macrox_x[contador_tabuleiro[0]][0])][(posicoes_macrox_x[contador_tabuleiro[0]][1])].value = x
     contador_tabuleiro[0] += 1
     lista_simbolos.pop(0)
-    verifica_figura_macrox(contador_tabuleiro, tabuleiro_Destino)
-    copiar_valores_tabuleiro(tabuleiro_Destino, tabuleiro_Origem)
+    verifica_figura_macrox(contador_tabuleiro, tabuleiro)
 
 
 #funcao para preencher celulas
@@ -327,28 +274,28 @@ def jogar():
 
     while(len(lista_simbolos) > 0):
         if(jogo.existe_macrox): #se existir macrox jogar este
-            jogar_macrofigurax(tabuleiro, tabuleiro_macrox, contador_tabuleiro)
+            jogar_macrofigurax(contador_tabuleiro)
         else:
             #procedimento normal para microfiguras
             if lista_simbolos[0].value == x:
-                if(tabuleiro[(posicoes_microfigura_x[contador_tabuleiro[0]][0])][(posicoes_microfigura_x[contador_tabuleiro[0]][1])].value != " "):
-                    exit(1)
-                tabuleiro[(posicoes_microfigura_x[contador_tabuleiro[0]][0])][(posicoes_microfigura_x[contador_tabuleiro[0]][1])].value = x
+                if(tabuleiro[(posicoes_base_x[contador_tabuleiro[0]][0])][(posicoes_base_x[contador_tabuleiro[0]][1])] != " "):
+                    exit("Erro, jogo normal, colocação do x onde já existia uma peça")
+                tabuleiro[(posicoes_base_x[contador_tabuleiro[0]][0])][(posicoes_base_x[contador_tabuleiro[0]][1])] = x
                 contador_tabuleiro[0] += 1
             elif lista_simbolos[0].value == bola:
-                if(tabuleiro[(posicoes_microfigura_o[contador_tabuleiro[1]][0])][(posicoes_microfigura_o[contador_tabuleiro[1]][1])].value != " "):
-                    exit(1)
-                tabuleiro[(posicoes_microfigura_o[contador_tabuleiro[1]][0])][(posicoes_microfigura_o[contador_tabuleiro[1]][1])].value = bola
+                if(tabuleiro[(posicoes_base_bola[contador_tabuleiro[1]][0])][(posicoes_base_bola[contador_tabuleiro[1]][1])] != " "):
+                    exit("Erro, jogo normal, colocação da bola onde já existia uma peça")
+                tabuleiro[(posicoes_base_bola[contador_tabuleiro[1]][0])][(posicoes_base_bola[contador_tabuleiro[1]][1])] = bola
                 contador_tabuleiro[1] += 1
             elif lista_simbolos[0].value == cruz:
-                if(tabuleiro[(posicoes_microfigura_cruz[contador_tabuleiro[2]][0])][(posicoes_microfigura_cruz[contador_tabuleiro[2]][1])].value != " "):
-                    exit(1)
-                tabuleiro[(posicoes_microfigura_cruz[contador_tabuleiro[2]][0])][(posicoes_microfigura_cruz[contador_tabuleiro[2]][1])].value = cruz
+                if(tabuleiro[(posicoes_base_cruz[contador_tabuleiro[2]][0])][(posicoes_base_cruz[contador_tabuleiro[2]][1])] != " "):
+                    exit("Erro, jogo normal, colocação da cruz onde já existia uma peça")
+                tabuleiro[(posicoes_base_cruz[contador_tabuleiro[2]][0])][(posicoes_base_cruz[contador_tabuleiro[2]][1])] = cruz
                 contador_tabuleiro[2] += 1
             elif lista_simbolos[0].value == traco:
-                if(tabuleiro[(posicoes_microfigura_traco[contador_tabuleiro[3]][0])][(posicoes_microfigura_traco[contador_tabuleiro[3]][1])].value != " "):
-                    exit(1)
-                tabuleiro[(posicoes_microfigura_traco[contador_tabuleiro[3]][0])][(posicoes_microfigura_traco[contador_tabuleiro[3]][1])].value = traco
+                if(tabuleiro[(posicoes_base_traco[contador_tabuleiro[3]][0])][(posicoes_base_traco[contador_tabuleiro[3]][1])] != " "):
+                    exit("Erro, jogo normal, colocação do traço onde já existia uma peça")
+                tabuleiro[(posicoes_base_traco[contador_tabuleiro[3]][0])][(posicoes_base_traco[contador_tabuleiro[3]][1])] = traco
                 contador_tabuleiro[3] += 1
             
             lista_simbolos.pop(0)
@@ -363,27 +310,27 @@ def verificaFigura(lista_contadores, tabuleiro, run_x):
         score += score_micro_x
         while(lista_contadores[0] != 0):
                 lista_contadores[0] -= 1
-                tabuleiro[(posicoes_microfigura_x[lista_contadores[0]][0])][(posicoes_microfigura_x[lista_contadores[0]][1])].value = " "
+                tabuleiro[(posicoes_base_x[lista_contadores[0]][0])][(posicoes_base_x[lista_contadores[0]][1])] = " "
 
     if(lista_contadores[1] == micro_forma_0):
         score += score_micro_bola
         while(lista_contadores[1] != 0):
             lista_contadores[1] -= 1
-            tabuleiro[(posicoes_microfigura_o[lista_contadores[1]][0])][(posicoes_microfigura_o[lista_contadores[1]][1])].value = " "
+            tabuleiro[(posicoes_base_bola[lista_contadores[1]][0])][(posicoes_base_bola[lista_contadores[1]][1])] = " "
 
 
     if(lista_contadores[2] == micro_forma_cruz):
         score += score_micro_cruz
         while(lista_contadores[2] != 0):
             lista_contadores[2] -= 1
-            tabuleiro[(posicoes_microfigura_cruz[lista_contadores[2]][0])][(posicoes_microfigura_cruz[lista_contadores[2]][1])].value = " "
+            tabuleiro[(posicoes_base_cruz[lista_contadores[2]][0])][(posicoes_base_cruz[lista_contadores[2]][1])] = " "
 
 
     if(lista_contadores[3] == micro_forma_traco):
         score += score_micro_traco
         while(lista_contadores[3] != 0):
                 lista_contadores[3] -= 1
-                tabuleiro[(posicoes_microfigura_traco[lista_contadores[3]][0])][(posicoes_microfigura_traco[lista_contadores[3]][1])].value = " "
+                tabuleiro[(posicoes_base_traco[lista_contadores[3]][0])][(posicoes_base_traco[lista_contadores[3]][1])] = " "
 
 
 #verifica se existe uma figura macro_x no tabuleiro
@@ -394,7 +341,7 @@ def verifica_figura_macrox(lista_contadores, tabuleiro):
         score += score_macro_x
         while(lista_contadores[0] != 0):
                 lista_contadores[0] -= 1
-                tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][(posicoes_macrox_x[lista_contadores[0]][1])].value = " "
+                tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][(posicoes_macrox_x[lista_contadores[0]][1])] = " "
         
         jogo.setExiste_Macrox()
 
@@ -405,7 +352,7 @@ def calcularScoreFinal():
     numeroPecasRestantes = 0
     for linha in tabuleiro:
         for celula in linha:
-            if(not celula.value == " "):
+            if(celula != " "):
                 numeroPecasRestantes += 1
 
     score -= 2**numeroPecasRestantes
@@ -415,15 +362,9 @@ def calcularScoreFinal():
 def exibir_tabuleiro(tabuleiro_exibir):
     print('-' * 9)
     for linha in tabuleiro_exibir:
-        print('|'.join(celula.value for celula in linha))
+        print('|'.join(celula for celula in linha))
         print('-' * 9)
 
-
-def copiar_valores_tabuleiro(tabuleiro_origem, tabuleiro_destino):
-    for i in range(len(tabuleiro_origem)):
-        for j in range(len(tabuleiro_origem[i])):
-                # Copy attributes if it's a Celula instance
-                tabuleiro_destino[i][j].value = tabuleiro_origem[i][j].value
 
 
 
