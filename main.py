@@ -102,7 +102,7 @@ lista_simbolos = []
 
 #definir posicoes microfiguras
 posicoes_microfigura_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-posicoes_microfigura_o = [(3, 0), (3, 1), (4, 0), (4, 1)]
+posicoes_microfigura_o = [(3,0), (4,1), (3,1), (4,0)]
 posicoes_microfigura_cruz = [(2,3), (3,2), (3,4), (4,3), (3,3)]
 posicoes_microfigura_traco = [(1, 4), (2, 4)]
 posicoes_lixo = [(0, 1), (0, 3), (0, 4), (1, 0), (1, 2), (1, 3), (2, 1), (4, 2), (4, 4)]
@@ -130,7 +130,7 @@ def main():
     #definir_simbolo_util()      será necessário para a formação de macrofiguras, mas por enquanto não
 
 
-    while(numero_simulacoes < 100000):
+    while(numero_simulacoes < 1000000):
         score = 0
         iniciar_tabuleiro(tabuleiro, posicoes_microfigura_x, posicoes_microfigura_o, posicoes_microfigura_cruz, posicoes_microfigura_traco)
         iniciar_tabuleiro(tabuleiro_macrox, posicoes_macrox_x, posicoes_macrox_bola, posicoes_macrox_cruz, posicoes_macrox_traco)
@@ -164,30 +164,32 @@ def teste_ver_macrox():
     
 
     while(len(array_x) >= 9):
-        contador_bola_antes_espaco_critico = 0
-        contador_bola_depois_espaco_critico = 0
         
-        #verifica antes do espaço critico quantas bolas tem
-        while(array_x[5] > array_o[contador_bola_antes_espaco_critico]):
-            contador_bola_antes_espaco_critico += 1
-            #caso não existam mais bolas para verificar
-            if((contador_bola_antes_espaco_critico) == len(array_o)):
-                continue_loop = False
-                break
-        
-        if(contador_bola_antes_espaco_critico % 4 > 2):
-            isImposible = True
-
-        #verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite    
-        if(continue_loop):
-            while((array_x[8] > array_o[contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico])):
-                contador_bola_depois_espaco_critico += 1
+        if(len(array_o) > 0):
+            contador_bola_antes_espaco_critico = 0
+            contador_bola_depois_espaco_critico = 0
+            
+            #verifica antes do espaço critico quantas bolas tem
+            while(array_x[5] > array_o[contador_bola_antes_espaco_critico]):
+                contador_bola_antes_espaco_critico += 1
                 #caso não existam mais bolas para verificar
-                if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) == (len(array_o))):
+                if((contador_bola_antes_espaco_critico) == len(array_o)):
+                    continue_loop = False
                     break
+            
+            if(contador_bola_antes_espaco_critico % 4 > 2):
+                isImposible = True
 
-        if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) > 2):
-            isImposible = True
+            #verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite    
+            if(continue_loop):
+                while((array_x[8] > array_o[contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico])):
+                    contador_bola_depois_espaco_critico += 1
+                    #caso não existam mais bolas para verificar
+                    if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) == (len(array_o))):
+                        break
+
+            if((contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico) > 2):
+                isImposible = True
 
 
         if(isImposible):
@@ -329,15 +331,23 @@ def jogar():
         else:
             #procedimento normal para microfiguras
             if lista_simbolos[0].value == x:
+                if(tabuleiro[(posicoes_microfigura_x[contador_tabuleiro[0]][0])][(posicoes_microfigura_x[contador_tabuleiro[0]][1])].value != " "):
+                    exit(1)
                 tabuleiro[(posicoes_microfigura_x[contador_tabuleiro[0]][0])][(posicoes_microfigura_x[contador_tabuleiro[0]][1])].value = x
                 contador_tabuleiro[0] += 1
             elif lista_simbolos[0].value == bola:
+                if(tabuleiro[(posicoes_microfigura_o[contador_tabuleiro[1]][0])][(posicoes_microfigura_o[contador_tabuleiro[1]][1])].value != " "):
+                    exit(1)
                 tabuleiro[(posicoes_microfigura_o[contador_tabuleiro[1]][0])][(posicoes_microfigura_o[contador_tabuleiro[1]][1])].value = bola
                 contador_tabuleiro[1] += 1
             elif lista_simbolos[0].value == cruz:
+                if(tabuleiro[(posicoes_microfigura_cruz[contador_tabuleiro[2]][0])][(posicoes_microfigura_cruz[contador_tabuleiro[2]][1])].value != " "):
+                    exit(1)
                 tabuleiro[(posicoes_microfigura_cruz[contador_tabuleiro[2]][0])][(posicoes_microfigura_cruz[contador_tabuleiro[2]][1])].value = cruz
                 contador_tabuleiro[2] += 1
             elif lista_simbolos[0].value == traco:
+                if(tabuleiro[(posicoes_microfigura_traco[contador_tabuleiro[3]][0])][(posicoes_microfigura_traco[contador_tabuleiro[3]][1])].value != " "):
+                    exit(1)
                 tabuleiro[(posicoes_microfigura_traco[contador_tabuleiro[3]][0])][(posicoes_microfigura_traco[contador_tabuleiro[3]][1])].value = traco
                 contador_tabuleiro[3] += 1
             
