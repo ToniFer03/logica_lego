@@ -53,7 +53,8 @@ erro_colocacao_traco = "Colocação do traço num espaço ainda ocupado"
 
 # Define das variaveis iniciais
 total_simulacoes = 0  # score total das simulacoes todas
-numero_simulacoes = 0  # numero simulacoes realizadas
+numero_simulacoes = 0  # numero simulações realizadas
+numero_simulacoes_negativas = 0  # numero de simulações negativas
 media = 0  # media das simulacoes
 score = 0  # score do jogo
 
@@ -123,15 +124,14 @@ posicoes_macrox_traco = [(1, 4), (2, 4)]
 # Definição de funções
 def main():
     global numero_simulacoes
+    global numero_simulacoes_negativas
     global total_simulacoes
     global score
     global tabuleiro
     global lista_simbolos
     global jogo
 
-    # definir_simbolo_util()      será necessário para a formação de macrofiguras, mas por enquanto não
-
-    while numero_simulacoes < 100000:
+    while numero_simulacoes < 10000:
         score = 0
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerarFilaRandom(lista_simbolos)
@@ -140,9 +140,14 @@ def main():
         calcularScoreFinal()
         numero_simulacoes += 1
         total_simulacoes += score
+        if(score < 0):
+            numero_simulacoes_negativas += 1
     media = total_simulacoes / numero_simulacoes
     print(
-        f"A media de score desta versão é de {media} | Numero de simulacoes: {numero_simulacoes}"
+        f"A media de score desta versão é de {media} | Numero de simulacoes: {numero_simulacoes} | "
+    )
+    print(
+        f"Porcentagem de Simulações negativas {numero_simulacoes_negativas/numero_simulacoes*100}"
     )
     return 0
 
@@ -257,7 +262,7 @@ def definir_simbolo_util():
             break
 
 
-#Função para preencher celulas no caso de macrofigura
+# Função para preencher celulas no caso de macrofigura
 def jogar_macrofigurax(contador_tabuleiro):
     while lista_simbolos[0].fimMacrofigura != True:
         # procedimento normal para macrofigura_x
