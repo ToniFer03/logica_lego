@@ -136,6 +136,8 @@ def main():
     return 0
 
 
+
+
 # Função que verifica se é possível ou não fazer uma macrofigura x
 # O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
 def teste_ver_macrox():
@@ -184,7 +186,7 @@ def teste_ver_macrox():
                         break
 
             if (
-                contador_bola_antes_espaco_critico + contador_bola_depois_espaco_critico
+                (contador_bola_antes_espaco_critico % 4) + contador_bola_depois_espaco_critico
             ) > 2:
                 isImposible = True
 
@@ -317,6 +319,7 @@ def verifica_existencia_figura(lista_contadores, tabuleiro, run_x):
             tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][
                 (posicoes_macrox_x[lista_contadores[0]][1])
             ] = " "
+        
 
     # Caso em que existe uma microfigura x no tabuleiro
     elif lista_contadores[0] == micro_forma_x and run_x:
