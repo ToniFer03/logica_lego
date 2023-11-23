@@ -26,7 +26,7 @@ class Simbolo:
             f"Inicio Macrofigura: {self.inicioMacrofigura}, "
             f"Fim Macrofigura: {self.fimMacrofigura}"
         )
-
+    
 
 # Define mensagens de erros
 erro_colocacao_x = "Colocação do x num espaço ainda ocupado"
@@ -119,7 +119,7 @@ def main():
         score = 0
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerarFilaRandom(lista_simbolos)
-        teste_ver_macrox()
+        teste_ver_macrox(0)
         jogar()
         calcularScoreFinal()
         numero_simulacoes += 1
@@ -137,10 +137,20 @@ def main():
 
 
 
+def conta_bolas_tabuleiro():
+    bolas_tabuleiro = 0
+    for i in tabuleiro:
+        for j in i:
+            if(j == bola):
+                bolas_tabuleiro += 1
+    
+    return bolas_tabuleiro
+
+
 
 # Função que verifica se é possível ou não fazer uma macrofigura x
 # O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
-def teste_ver_macrox():
+def teste_ver_macrox(bolas_tabuleiro):
     array_x = []
     array_o = []
     isImposible = False
@@ -165,7 +175,7 @@ def teste_ver_macrox():
                     continue_loop = False
                     break
 
-            if contador_bola_antes_espaco_critico % 4 > 2:
+            if (contador_bola_antes_espaco_critico + bolas_tabuleiro) % 4 > 2:
                 isImposible = True
 
             # verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite
@@ -186,7 +196,7 @@ def teste_ver_macrox():
                         break
 
             if (
-                (contador_bola_antes_espaco_critico % 4) + contador_bola_depois_espaco_critico
+                ((contador_bola_antes_espaco_critico + bolas_tabuleiro) % 4) + contador_bola_depois_espaco_critico
             ) > 2:
                 isImposible = True
 
@@ -305,6 +315,7 @@ def jogar():
         verifica_existencia_figura(contador_tabuleiro, tabuleiro, macro_x)
 
 
+
 # Função que verifica se existe uma figura completa no tabueiro
 # Caso exista, limpa as posições do tabueiro que foram usadas
 # e adiciona o score a que corresponde
@@ -319,6 +330,9 @@ def verifica_existencia_figura(lista_contadores, tabuleiro, run_x):
             tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][
                 (posicoes_macrox_x[lista_contadores[0]][1])
             ] = " "
+        
+        num_bolas_tabuleiro = conta_bolas_tabuleiro()
+        teste_ver_macrox(num_bolas_tabuleiro)
         
 
     # Caso em que existe uma microfigura x no tabuleiro
