@@ -119,7 +119,7 @@ def main():
         score = 0
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerarFilaRandom(lista_simbolos)
-        teste_ver_macrox(0)
+        verifica_possiblidade_macrox(0)
         jogar()
         calcularScoreFinal()
         numero_simulacoes += 1
@@ -136,76 +136,80 @@ def main():
     return 0
 
 
-
-def conta_bolas_tabuleiro():
-    bolas_tabuleiro = 0
+# Função responsavel por contar quantas peças de um determinado tipo estão no tabuleiro
+def conta_pecas_tabuleiro(simbolo):
+    simbolos_tabuleiro = 0
     for i in tabuleiro:
         for j in i:
-            if(j == bola):
-                bolas_tabuleiro += 1
+            if(j == simbolo):
+                simbolos_tabuleiro += 1
     
-    return bolas_tabuleiro
+    return simbolos_tabuleiro
 
 
-
-# Função que verifica se é possível ou não fazer uma macrofigura x
-# O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
-def teste_ver_macrox(bolas_tabuleiro):
-    array_x = []
-    array_o = []
-    isImposible = False
+def condição_bola_macroX(num_bolas_tabuleiro, array_x, array_bola):
     continue_loop = True
+
+    if len(array_bola) > 0:
+        contador_bola_antes_espaco_critico = 0
+        contador_bola_depois_espaco_critico = 0
+
+        # verifica antes do espaço critico quantas bolas tem
+        while array_x[5] > array_bola[contador_bola_antes_espaco_critico]:
+            contador_bola_antes_espaco_critico += 1
+            # caso não existam mais bolas para verificar
+            if (contador_bola_antes_espaco_critico) == len(array_bola):
+                continue_loop = False
+                break
+
+        if (contador_bola_antes_espaco_critico + num_bolas_tabuleiro) % 4 > 2:
+            return False
+
+        # verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite
+        if continue_loop:
+            while (
+                array_x[8]
+                > array_bola[
+                    contador_bola_antes_espaco_critico
+                    + contador_bola_depois_espaco_critico
+                ]
+            ):
+                contador_bola_depois_espaco_critico += 1
+                # caso não existam mais bolas para verificar
+                if (
+                    contador_bola_antes_espaco_critico
+                    + contador_bola_depois_espaco_critico
+                ) == (len(array_bola)):
+                    break
+
+        if (
+            ((contador_bola_antes_espaco_critico + num_bolas_tabuleiro) % 4) + contador_bola_depois_espaco_critico
+        ) > 2:
+            return False
+
+    return True
+
+
+# Função que verifica se é possível ou não fazer uma macrofigura x, recebe o número de bolas atualmente no tabuleiro
+# O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
+def verifica_possiblidade_macrox(bolas_tabuleiro):
+    array_x = []
+    array_bola = []
 
     for index, i in enumerate(lista_simbolos):
         if i.value == x:
             array_x.append(index)
         elif i.value == bola:
-            array_o.append(index)
+            array_bola.append(index)
 
     while len(array_x) >= 9:
-        if len(array_o) > 0:
-            contador_bola_antes_espaco_critico = 0
-            contador_bola_depois_espaco_critico = 0
 
-            # verifica antes do espaço critico quantas bolas tem
-            while array_x[5] > array_o[contador_bola_antes_espaco_critico]:
-                contador_bola_antes_espaco_critico += 1
-                # caso não existam mais bolas para verificar
-                if (contador_bola_antes_espaco_critico) == len(array_o):
-                    continue_loop = False
-                    break
-
-            if (contador_bola_antes_espaco_critico + bolas_tabuleiro) % 4 > 2:
-                isImposible = True
-
-            # verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite
-            if continue_loop:
-                while (
-                    array_x[8]
-                    > array_o[
-                        contador_bola_antes_espaco_critico
-                        + contador_bola_depois_espaco_critico
-                    ]
-                ):
-                    contador_bola_depois_espaco_critico += 1
-                    # caso não existam mais bolas para verificar
-                    if (
-                        contador_bola_antes_espaco_critico
-                        + contador_bola_depois_espaco_critico
-                    ) == (len(array_o)):
-                        break
-
-            if (
-                ((contador_bola_antes_espaco_critico + bolas_tabuleiro) % 4) + contador_bola_depois_espaco_critico
-            ) > 2:
-                isImposible = True
-
-        if isImposible:
-            array_x = array_x[5:]
-        else:
+        if condição_bola_macroX(bolas_tabuleiro, array_x, array_bola):
             lista_simbolos[array_x[0]].setInicioMacrofigura()
             lista_simbolos[array_x[8]].setFimMacrofigura()
             break
+        else:
+           array_x = array_x[5:]
 
 
 # Função para gerar uma lista aleatoria de simbolos
@@ -331,8 +335,8 @@ def verifica_existencia_figura(lista_contadores, tabuleiro, run_x):
                 (posicoes_macrox_x[lista_contadores[0]][1])
             ] = " "
         
-        num_bolas_tabuleiro = conta_bolas_tabuleiro()
-        teste_ver_macrox(num_bolas_tabuleiro)
+        num_bolas_tabuleiro = conta_pecas_tabuleiro(bola)
+        verifica_possiblidade_macrox(num_bolas_tabuleiro)
         
 
     # Caso em que existe uma microfigura x no tabuleiro
