@@ -4,29 +4,9 @@ import random
 class Simbolo:
     def __init__(self, value):
         self.value = value
-        self.isTrash = False
-        self.inicioMacrofigura = False
-        self.fimMacrofigura = False
-
-    def setTrashTrue(self):
-        if self.isTrash:
-            self.isTrash = False
-        else:
-            self.isTrash = True
-
-    def setInicioMacrofigura(self):
-        self.inicioMacrofigura = True
-
-    def setFimMacrofigura(self):
-        self.fimMacrofigura = True
 
     def __str__(self):
-        return (
-            f"Valor: {self.value}, "
-            f"Lixo: {self.isTrash}, "
-            f"Inicio Macrofigura: {self.inicioMacrofigura}, "
-            f"Fim Macrofigura: {self.fimMacrofigura}"
-        )
+        return f"Valor: {self.value}, "
 
 
 # Define mensagens de erros
@@ -55,7 +35,6 @@ score_micro_bola = 16  # score por completar uma bola
 score_micro_x = 32  # score por completar uma x
 score_micro_cruz = 32  # score por completar uma cruz
 score_micro_traco = 4  # score por completar um traco
-score_macro_x = 512  # score para completar macro x
 
 
 # define simbolos a utilizar
@@ -72,10 +51,6 @@ micro_forma_cruz = 5
 micro_forma_traco = 2
 
 
-# define tamanho das macrofiguras
-macro_forma_x = 9
-
-
 # Criar um tabuleiro vazio
 tabuleiro = []
 
@@ -89,28 +64,10 @@ posicao_cruz_uso = [(0, 0) for _ in range(9)]
 posicao_traco_uso = [(0, 0) for _ in range(9)]
 
 # Posições base
-# posicoes_base_bola = [(3,0), (3,1), (4,0), (4,1)]          Estão na ordem original
-# posicoes_base_cruz = [(2,3), (3,2), (3,3), (3,4), (4,3)]   Estão na ordem original
+posicoes_base_bola = [(3, 0), (3, 1), (4, 0), (4, 1)]
+posicoes_base_cruz = [(2, 3), (3, 2), (3, 3), (3, 4), (4, 3)]
 posicoes_base_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
-posicoes_base_bola = [(3, 0), (4, 1), (3, 1), (4, 0)]
-posicoes_base_cruz = [(2, 3), (3, 2), (3, 4), (4, 3), (3, 3)]
 posicoes_base_traco = [(1, 4), (2, 4)]
-
-# Posicoes caso macrox
-posicoes_macrox_x = [
-    (0, 0),
-    (0, 4),
-    (1, 1),
-    (1, 3),
-    (2, 2),
-    (4, 4),
-    (3, 1),
-    (4, 0),
-    (3, 3),
-]
-posicoes_macrox_bola = [(3, 0), (4, 1), (3, 1), (4, 0)]
-posicoes_macrox_cruz = [(2, 3), (3, 2), (3, 4), (4, 3), (3, 3)]
-posicoes_macrox_traco = [(1, 4), (2, 4)]
 
 
 # Definição de funções
@@ -124,7 +81,6 @@ def main():
         score = 0
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerarFilaRandom(lista_simbolos)
-        verifica_possiblidade_macrox(0)
         jogar()
         calcularScoreFinal()
         calcular_estatisticas()
@@ -137,83 +93,6 @@ def main():
         f"Porcentagem de Simulações negativas {numero_simulacoes_negativas/numero_simulacoes*100}"
     )
     return 0
-
-
-# Função responsavel por contar quantas peças de um determinado tipo estão no tabuleiro
-def conta_pecas_tabuleiro(simbolo):
-    simbolos_tabuleiro = 0
-    for i in tabuleiro:
-        for j in i:
-            if j == simbolo:
-                simbolos_tabuleiro += 1
-
-    return simbolos_tabuleiro
-
-
-# Função responsavel por verificar se não existira interferencia entre a formação do simbolo bola e do macro_x
-def condição_bola_macroX(num_bolas_tabuleiro, array_x, array_bola):
-    continue_loop = True
-
-    if len(array_bola) > 0:
-        contador_bola_antes_espaco_critico = 0
-        contador_bola_depois_espaco_critico = 0
-
-        # verifica antes do espaço critico quantas bolas tem
-        while array_x[5] > array_bola[contador_bola_antes_espaco_critico]:
-            contador_bola_antes_espaco_critico += 1
-            # caso não existam mais bolas para verificar
-            if (contador_bola_antes_espaco_critico) == len(array_bola):
-                continue_loop = False
-                break
-
-        if (contador_bola_antes_espaco_critico + num_bolas_tabuleiro) % 4 > 2:
-            return False
-
-        # verifica se depois de entrar no espaço critico as bolas vão ultrapassar o limite
-        if continue_loop:
-            while (
-                array_x[8]
-                > array_bola[
-                    contador_bola_antes_espaco_critico
-                    + contador_bola_depois_espaco_critico
-                ]
-            ):
-                contador_bola_depois_espaco_critico += 1
-                # caso não existam mais bolas para verificar
-                if (
-                    contador_bola_antes_espaco_critico
-                    + contador_bola_depois_espaco_critico
-                ) == (len(array_bola)):
-                    break
-
-        if (
-            ((contador_bola_antes_espaco_critico + num_bolas_tabuleiro) % 4)
-            + contador_bola_depois_espaco_critico
-        ) > 2:
-            return False
-
-    return True
-
-
-# Função que verifica se é possível ou não fazer uma macrofigura x, recebe o número de bolas atualmente no tabuleiro
-# O espaço critico refere-se ao espaço onde já não é possivel fazer figuras devido a sobreposição de uma maior
-def verifica_possiblidade_macrox(bolas_tabuleiro):
-    array_x = []
-    array_bola = []
-
-    for index, i in enumerate(lista_simbolos):
-        if i.value == x:
-            array_x.append(index)
-        elif i.value == bola:
-            array_bola.append(index)
-
-    while len(array_x) >= 9:
-        if condição_bola_macroX(bolas_tabuleiro, array_x, array_bola):
-            lista_simbolos[array_x[0]].setInicioMacrofigura()
-            lista_simbolos[array_x[8]].setFimMacrofigura()
-            break
-        else:
-            array_x = array_x[5:]
 
 
 # Função para gerar uma lista aleatoria de simbolos
@@ -246,8 +125,6 @@ def jogar():
         0,
     ]  # [contador_x, contador_o, contador_cruz, contador_traco, contador_lixo]
 
-    micro_x_permitido = True  # Define se existe um macro_x a ser formado ou não
-
     # Define as posicoes a serem colocadas no tabuleiro
     copiar_valores_array(posicoes_base_x, posicao_x_uso)
     copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
@@ -256,13 +133,6 @@ def jogar():
 
     # Para todas os simbolos da lista
     while len(lista_simbolos) > 0:
-        # Caso detete o inicio do macro_x
-        if lista_simbolos[0].inicioMacrofigura:
-            micro_x_permitido = False
-            copiar_valores_array(posicoes_macrox_x, posicao_x_uso)
-            copiar_valores_array(posicoes_macrox_bola, posicao_bola_uso)
-            copiar_valores_array(posicoes_macrox_cruz, posicoes_base_cruz)
-
         # procedimento para colocar a peça no tabuleiro
         if lista_simbolos[0].value == x:  # No caso de ser um X
             if (
@@ -313,14 +183,8 @@ def jogar():
             ] = traco
             contador_tabuleiro[3] += 1
 
-        if lista_simbolos[0].fimMacrofigura:  # Caso chegue ao fim da macrofigura
-            micro_x_permitido = True
-            copiar_valores_array(posicoes_base_x, posicao_x_uso)
-            copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
-            copiar_valores_array(posicoes_base_cruz, posicao_cruz_uso)
-
         lista_simbolos.pop(0)
-        verifica_existencia_figura(contador_tabuleiro, tabuleiro, micro_x_permitido)
+        verifica_existencia_figura(contador_tabuleiro, tabuleiro)
 
 
 # Função que verifica se existe uma figura completa no tabueiro
