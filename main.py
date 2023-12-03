@@ -1,12 +1,13 @@
 import random
 
-
 class Simbolo:
     def __init__(self, value):
         self.value = value
 
     def __str__(self):
-        return f"Valor: {self.value}, "
+        return (
+            f"Valor: {self.value}, "
+        )
 
 
 # Define mensagens de erros
@@ -64,8 +65,8 @@ posicao_cruz_uso = [(0, 0) for _ in range(9)]
 posicao_traco_uso = [(0, 0) for _ in range(9)]
 
 # Posições base
-posicoes_base_bola = [(3, 0), (3, 1), (4, 0), (4, 1)]
-posicoes_base_cruz = [(2, 3), (3, 2), (3, 3), (3, 4), (4, 3)]
+posicoes_base_bola = [(3,0), (3,1), (4,0), (4,1)]          
+posicoes_base_cruz = [(2,3), (3,2), (3,3), (3,4), (4,3)]   
 posicoes_base_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
 posicoes_base_traco = [(1, 4), (2, 4)]
 
@@ -183,6 +184,7 @@ def jogar():
             ] = traco
             contador_tabuleiro[3] += 1
 
+
         lista_simbolos.pop(0)
         verifica_existencia_figura(contador_tabuleiro, tabuleiro)
 
@@ -190,32 +192,11 @@ def jogar():
 # Função que verifica se existe uma figura completa no tabueiro
 # Caso exista, limpa as posições do tabueiro que foram usadas
 # e adiciona o score a que corresponde
-def verifica_existencia_figura(lista_contadores, tabuleiro, run_micro_x):
+def verifica_existencia_figura(lista_contadores, tabuleiro):
     global score
 
-    # Caso em que existe macrofigura x no tabueiro
-    if lista_contadores[0] == macro_forma_x:
-        score += score_macro_x
-        while lista_contadores[0] != 0:
-            lista_contadores[0] -= 1
-
-            if (
-                tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][
-                    (posicoes_macrox_x[lista_contadores[0]][1])
-                ]
-                != x
-            ):
-                exit(erro_limpeza_x)
-
-            tabuleiro[(posicoes_macrox_x[lista_contadores[0]][0])][
-                (posicoes_macrox_x[lista_contadores[0]][1])
-            ] = " "
-
-        num_bolas_tabuleiro = conta_pecas_tabuleiro(bola)
-        verifica_possiblidade_macrox(num_bolas_tabuleiro)
-
     # Caso em que existe uma microfigura x no tabuleiro
-    elif lista_contadores[0] == micro_forma_x and run_micro_x:
+    if lista_contadores[0] == micro_forma_x:
         score += score_micro_x
         while lista_contadores[0] != 0:
             lista_contadores[0] -= 1
@@ -297,53 +278,6 @@ def calcularScoreFinal():
                 numeroPecasRestantes += 1
 
     score -= 2**numeroPecasRestantes
-
-
-# Função para exibir o tabuleiro
-def exibir_tabuleiro(tabuleiro_exibir):
-    print("-" * 9)
-    for linha in tabuleiro_exibir:
-        print("|".join(celula for celula in linha))
-        print("-" * 9)
-
-
-# Função para definir se simbolo é útil ou não
-def definir_simbolo_util():
-    contador_ocorrencias_x = 0
-    contador_ocorrencias_o = 0
-    contador_ocorrencias_cruz = 0
-    contador_ocorrencias_traco = 0
-
-    for simbolo in lista_simbolos:
-        if simbolo.value == x:
-            contador_ocorrencias_x += 1
-        if simbolo.value == bola:
-            contador_ocorrencias_o += 1
-        if simbolo.value == cruz:
-            contador_ocorrencias_cruz += 1
-        if simbolo.value == traco:
-            contador_ocorrencias_traco += 1
-
-    numero_lixo_x = contador_ocorrencias_x % micro_forma_x
-    numero_lixo_o = contador_ocorrencias_o % micro_forma_0
-    numero_lixo_cruz = contador_ocorrencias_cruz % micro_forma_cruz
-    numero_lixo_traco = contador_ocorrencias_traco % micro_forma_traco
-
-    for simbolo in reversed(lista_simbolos):
-        if simbolo.value == "x" and numero_lixo_x > 0:
-            simbolo.setTrashTrue()
-            numero_lixo_x -= 1
-        if simbolo.value == "o" and numero_lixo_o > 0:
-            simbolo.setTrashTrue()
-            numero_lixo_o -= 1
-        if simbolo.value == "+" and numero_lixo_cruz > 0:
-            simbolo.setTrashTrue()
-            numero_lixo_cruz -= 1
-        if simbolo.value == "-" and numero_lixo_traco:
-            simbolo.setTrashTrue()
-            numero_lixo_traco -= 1
-        if numero_lixo_traco + numero_lixo_o + numero_lixo_cruz + numero_lixo_x == 0:
-            break
 
 
 def calcular_estatisticas():
