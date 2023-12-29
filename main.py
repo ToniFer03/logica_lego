@@ -1,14 +1,8 @@
 import random
 
-
-class Simbolo:
-    def __init__(self, value):
-        self.value = value
-
-    def __str__(self):
-        return (
-            f"Valor: {self.value}, "
-        )
+# Para não ter de fazer 25 combinções para cada figura, apenas testar as combinações,
+# que aparecem em tuplas na com esssa posição. Assim se diminui o numero de combinações
+# a testar podendo aumentar a profundidade possivel da busca
 
 
 # Define mensagens de erros
@@ -54,15 +48,18 @@ micro_forma_cruz = 5
 micro_forma_traco = 2
 
 
-# define tamanho das macrofiguras
-macro_forma_x = 9
-
+# Profundidade de procura
+profundidade = 3
 
 # Criar um tabuleiro vazio
 tabuleiro = []
 
 # cria lista de espera
 lista_simbolos = []
+
+
+# Lista que vai conter proximas jogadas a serem feitas
+proximas_jogadas = []
 
 
 # Todos posições posiveis fazendo um x num tabuleiro 5x5
@@ -131,22 +128,112 @@ def main():
     global tabuleiro
     global lista_simbolos
 
+    numero_simulacoes = 0
     # loop das simulações
     while numero_simulacoes < 1:
         score = 0
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
-        gerarFilaRandom(lista_simbolos)
-        calcularScoreFinal()
-        calcular_estatisticas()
+        lista_simbolos = []
 
-    media = total_simulacoes / numero_simulacoes
-    print(
-        f"A media de score desta versão é de {media} | Numero de simulacoes: {numero_simulacoes} | "
-    )
-    print(
-        f"Porcentagem de Simulações negativas {numero_simulacoes_negativas/numero_simulacoes*100}"
-    )
+        gerarFilaRandom(lista_simbolos)
+        temp_tabuleiro()
+        verifica_existencia_micro_x()
+
+        numero_simulacoes += 1
+
     return 0
+
+
+def temp_tabuleiro():
+    # Define the positions of the micro_x
+    micro_x_positions = [(2, 2), (2, 4), (3, 3), (4, 2), (4, 4)]
+
+    # Place the micro_x on the tabuleiro
+    for pos in micro_x_positions:
+        tabuleiro[pos[0]][pos[1]] = 'x'
+
+
+# Função que ve as proximas 20 figuras na lista e retorna true se existirem 9 x's
+def verificarMacroX(lista_simbolos):
+    temp = lista_simbolos[20:]
+    if temp.count(x) >= 9:
+        print("Macro X")
+        return True
+    else:
+        return False
+
+
+# Função que ve as proximas 20 figuras na lista e retorna true se existirem 9 cruzes
+def verificarMacroCruz(lista_simbolos):
+    temp = lista_simbolos[20:]
+    if temp.count(cruz) >= 9:
+        print("Macro Cruz")
+        return True
+    else:
+        return False
+
+
+# Função que ve as proximas 20 figuras na lista e retorna true se existirem 8 bolas
+def verificarMacroBola(lista_simbolos):
+    temp = lista_simbolos[20:]
+    if temp.count(bola) >= 8:
+        print("Macro Bola")
+        return True
+    else:
+        return False
+
+
+# Função que verifica se existe uma microfigura x no tabuleiro
+def verifica_existencia_micro_x():
+    num_total_microfiguras = 9
+    
+    temp_posicao = posicoes_x[1:]
+
+    for lista_posicao in temp_posicao:
+        for posicao in lista_posicao:
+            if tabuleiro[posicao[0]][posicao[1]] != 'x':
+                num_total_microfiguras -= 1
+                break  # Inner loop
+
+    
+    if num_total_microfiguras == 0:
+        print("False")
+        return False
+    else:
+        print("True")
+        return True
+
+
+# Função que verifica se existe uma microfigura cruz no tabuleiro
+def verifica_existencia_micro_cruz():
+    num_total_microfiguras = 9
+
+    temp_posicao = posicoes_cruz[1:]
+
+    for lista_posicao in temp_posicao:
+        for posicao in lista_posicao:
+            if tabuleiro[posicao[0]][posicao[1]] != cruz:
+                num_total_microfiguras -= 1
+                break  # Inner loop
+
+    if num_total_microfiguras == 0:
+        print("False")
+        return False
+    else:
+        print("True")
+        return True
+
+
+# Itera pelas posições possiveis da figura a procura da melhor jogada
+def procurarJogadas():
+    return
+
+# Função que será responsável por calcular o score de uma certa jogada
+def calculateScore():
+    return
+
+
+
 
 
 # Função para gerar uma lista aleatoria de simbolos
@@ -156,8 +243,7 @@ def gerarFilaRandom(lista_simbolos):
 
     # Adiciona símbolos aleatórios à lista de espera
     for _ in range(tamanho_lista):
-        simbolo_aleatorio = Simbolo(random.choice([cruz, x, bola]))
-        lista_simbolos.append(simbolo_aleatorio)
+        lista_simbolos.append(random.choice([cruz, x, bola]))
 
 
 # Função para retirar o score das pecas ainda no tabuleiro
