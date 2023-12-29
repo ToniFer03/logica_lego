@@ -7,4 +7,6 @@ Score:
     Colocar peça em posição de micro quando macro é possível                -6    (feito)
     Colocar peça em posição de macro de outra quando não é possivel para si -10   (por fazer)
     Colocar peça em posição de micro                                         4    (feito)
-    Colocar peça ao lado de outra diferente                                 -3    (feito?)
+    Colocar peça ao lado de outra diferente                                 -4    (feito?)
+    Colocar peça a distancia de 2 de outra diferente                        -3    (feito?)
+    Colocar peça a distancia de 3 de outra diferente                        -1    (feito?)

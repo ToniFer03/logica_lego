@@ -49,7 +49,7 @@ micro_forma_traco = 2
 
 
 # Profundidade de procura
-profundidade = 3
+profundidade = 2
 
 # Criar um tabuleiro vazio
 tabuleiro = []
@@ -161,14 +161,15 @@ posicoes_traco = [
 
 
 # Variaveis que vão guardar se é possivel formar uma macrofigura
-possivel_macro_x = False
-possivel_macro_cruz = False
-possivel_macro_bola = False
-possivel_macro_traco = False
+possivel_macro_x = True
+possivel_macro_cruz = True
+possivel_macro_bola = True
+possivel_macro_traco = True
 
 
 # Lista com todas as figuras
 figuras = [x, cruz, bola, traco]
+
 
 
 # Definição de funções
@@ -185,8 +186,6 @@ def main():
         lista_simbolos = []
 
         gerarFilaRandom(lista_simbolos)
-        temp_init_tabuleiro()
-        limparMicroFigura(cruz, tabuleiro)
 
         numero_simulacoes += 1
 
@@ -461,23 +460,30 @@ def verifica_colocar_figura_macro(figura, posicao):
 # Função que verifica se peça foi colocada numa microfigura
 def verifica_colocar_figura_micro(figura, posicao):
     if figura == x:
-        if posicao in posicoes_x[1:]:
-            return True
+        for lista_posicoes in posicoes_x[1:]:
+            if posicao in lista_posicoes:
+                return True
         else:
             return False
+    
     elif figura == cruz:
-        if posicao in posicoes_cruz[1:]:
-            return True
+        for lista_posicoes in posicoes_cruz[1:]:
+            if posicao in lista_posicoes:
+                return True
         else:
             return False
+    
     elif figura == bola:
-        if posicao in posicoes_bola[9:]:
-            return True
+        for lista_posicoes in posicoes_bola[9:]:
+            if posicao in lista_posicoes:
+                return True
         else:
             return False
+    
     elif figura == traco:
-        if posicao in posicoes_traco[15:]:
-            return True
+        for lista_posicoes in posicoes_traco[15:]:
+            if posicao in lista_posicoes:
+                return True
         else:
             return False
 
@@ -603,67 +609,6 @@ def limparMicroFigura(figura, tabuleiro_temp):
     for posicao in temp_posicao:
         tabuleiro_temp[posicao[0]][posicao[1]] = " "
 
-
-# Update as listas com os moves possiveis
-def update_possiveis_x(possiveis_x, colocacao, macro_possivel):
-    if macro_possivel:
-        possiveis_x = posicoes_x[0]
-    
-    for lista_posicoes in posicoes_x[1:]:
-        if colocacao in lista_posicoes:
-            possiveis_x = lista_posicoes
-            break
-
-    return possiveis_x
-
-
-def update_possiveis_cruz(possiveis_cruz, colocacao, macro_possivel):
-    if macro_possivel:
-        possiveis_cruz = posicoes_cruz[0]
-    
-    for lista_posicoes in posicoes_cruz[1:]:
-        if colocacao in lista_posicoes:
-            possiveis_cruz = lista_posicoes
-            break
-
-    return possiveis_cruz
-
-
-def update_possiveis_bola(possiveis_bola, colocacao, macro_possivel):
-    if macro_possivel:
-        possiveis_bola = posicoes_bola[:9]
-    
-    for lista_posicoes in posicoes_bola[9:]:
-        if colocacao in lista_posicoes:
-            possiveis_bola = lista_posicoes
-            break
-
-    return possiveis_bola
-
-
-def update_possiveis_traco(possiveis_traco, colocacao, macro_possivel):
-    if macro_possivel:
-        possiveis_traco = posicoes_traco[:15]
-    
-    for lista_posicoes in posicoes_traco[15:]:
-        if colocacao in lista_posicoes:
-            possiveis_traco = lista_posicoes
-            break
-
-    return possiveis_traco
-
-
-def update_possiveis(possiveis, colocacao, macro_possivel, figura):
-    if figura == x:
-        possiveis = update_possiveis_x(possiveis, colocacao, macro_possivel)
-    elif figura == cruz:
-        possiveis = update_possiveis_cruz(possiveis, colocacao, macro_possivel)
-    elif figura == bola:
-        possiveis = update_possiveis_bola(possiveis, colocacao, macro_possivel)
-    elif figura == traco:
-        possiveis = update_possiveis_traco(possiveis, colocacao, macro_possivel)
-
-    return possiveis
 # --------------------------------------------------------------------------------------------------------
 
 
@@ -671,22 +616,39 @@ def update_possiveis(possiveis, colocacao, macro_possivel, figura):
 # Itera pelas posições possiveis da figura a procura da melhor jogada
 def procurarJogadas():
     tabuleiro_temp = tabuleiro.copy() # Tabuleiro original
-    lista_simbolos_temp = lista_simbolos.copy() # Lista de simbolos original
+    lista_simbolos_temp = lista_simbolos[:profundidade] # Lista de simbolos original
 
     lista_tabelas = [] # Lista que vai conter tabelas necessarias para a procura de jogadas
-    lista_jogadas = [] # Lista que vai conter todas as jogadas ja testadas
-
-    # Arrays com lista de posicoes possiveis para colocar uma peça
-    posicoes_possiveis_x = []
-    posicoes_possiveis_cruz = []
-    posicoes_possiveis_bola = []
-    posicoes_possiveis_traco = []
-
-    # Pela profundidade da busca
-    for i in range(profundidade):
-        break
+    lista_jogadas = [] # Lista que vai conter todas as combinações de jogadas já testadas
     
-    return
+
+
+# Retorna as 10 melhores jogadas, com os seus tabuleiros e scores
+def get_best_moves(simbolo, tabuleiro):
+    score_array = []
+    tabuleiro_array = []
+    posicao_array = []
+    moves_array = []
+
+    for linha in tabuleiro:
+        for celula in linha:
+            if celula == " ":
+                posicao = (tabuleiro.index(linha), linha.index(celula))
+                score, tabuleiro_temp = calculate_score(simbolo, tabuleiro, posicao)
+                score_array.append(score)
+                tabuleiro_array.append(tabuleiro_temp)
+                posicao_array.append(posicao)
+
+    # For the 10 best scores, put them with the corresponding tabuleiro and posicao in the moves_array
+    for _ in range(10):
+        max_score = max(score_array)
+        index = score_array.index(max_score)
+        moves_array.append((max_score, tabuleiro_array[index], posicao_array[index]))
+        score_array.remove(max_score)
+    
+    return moves_array
+                
+                
 
 
 
@@ -694,6 +656,7 @@ def procurarJogadas():
 def calculate_score(figura, tabuleiro, posicao):
     score = 0
     tabuleiro_temp = tabuleiro.copy()
+    tabuleiro_temp[posicao[0]][posicao[1]] = figura
 
     # Faço uma copia da lista de figuras para poder remover a figura que foi colocada
     temp_lista_figuras = figuras.copy()
@@ -725,14 +688,27 @@ def calculate_score(figura, tabuleiro, posicao):
             score += 4
 
     
-    # Se colocou uma peça ao lado de outra diferente diminiu o score por 3
+    # Se colocou uma peça ao lado de outra diferente diminiu o score por 4
     if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 1][posicao[1]] != figura:
+        score -= 4
+    
+    # Se colocou uma peça a distancia de 2 de outra diferente diminiu o score por 3
+    if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 2][posicao[1]] != figura:
         score -= 3
+    
+    # Se colocou uma peça a distancia de 3 de outra diferente diminiu o score por 1
+    if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 3][posicao[1]] != figura:
+        score -= 1
 
 
-    # Verifica se o tabuleiro possui celulas vazias (tem de ser a ultima a verificar)
-    if " " not in tabuleiro_temp:
-        score -= 1000
+    # Verifica se o tabuleiro possui celulas vazias, tabuleiro é array de array, caso não exista nenhum -1000
+    for linha in tabuleiro_temp:
+        for celula in linha:
+            if celula == " ":
+                break
+        else:
+            score -= 1000
+            break
 
 
     return score, tabuleiro_temp
