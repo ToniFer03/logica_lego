@@ -1,0 +1,10 @@
+Score:
+    Tabuleiro cheio                                                         -1000 (feito)
+    Macrofigura completa                                                     500  (feito)
+    Microfigura completa quando macro possivel                              -100  (feito)
+    Microfigura completa                                                     60   (feito)
+    Colocar peça em posição de macro quando macropossivel                    8    
+    Colocar peça em posição de micro quando macro é possível                -6    (feito)
+    Colocar peça em posição de macro de outra quando não é possivel para si -10   (por fazer)
+    Colocar peça em posição de micro                                         4    (feito)
+    Colocar peça ao lado de outra diferente                                 -3    (feito?)
