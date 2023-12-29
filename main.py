@@ -23,7 +23,7 @@ total_simulacoes = 0  # score total das simulacoes todas
 numero_simulacoes = 0  # numero simulações realizadas
 numero_simulacoes_negativas = 0  # numero de simulações negativas
 media = 0  # media das simulacoes
-score = 0  # score do jogo
+resultado_jogo = 0  # score do jogo
 
 
 # Definição dos scores para cada forma
@@ -32,6 +32,9 @@ score_micro_x = 32  # score por completar uma x
 score_micro_cruz = 32  # score por completar uma cruz
 score_micro_traco = 4  # score por completar um traco
 score_macro_x = 512  # score para completar macro x
+score_macro_cruz = 512  # score para completar macro cruz
+score_macro_bola = 256  # score para completar macro bola
+score_macro_traco = 64  # score para completar macro traco
 
 
 # define simbolos a utilizar
@@ -161,10 +164,10 @@ posicoes_traco = [
 
 
 # Variaveis que vão guardar se é possivel formar uma macrofigura
-possivel_macro_x = True
-possivel_macro_cruz = True
-possivel_macro_bola = True
-possivel_macro_traco = True
+possivel_macro_x = False
+possivel_macro_cruz = False
+possivel_macro_bola = False
+possivel_macro_traco = False
 
 
 # Lista com todas as figuras
@@ -186,6 +189,8 @@ def main():
         lista_simbolos = []
 
         gerarFilaRandom(lista_simbolos)
+        jogar()
+        calcularScoreFinal()
 
         numero_simulacoes += 1
 
@@ -204,7 +209,7 @@ def temp_init_tabuleiro():
 
 #--------------------------------------------------------------------------------------------------------
 # Função que ve as proximas 20 figuras na lista e retorna true se existirem 9 x's
-def verificarMacroX(lista_simbolos):
+def verificarMacroX():
     temp = lista_simbolos[20:]
     if temp.count(x) >= 9:
         print("Macro X")
@@ -214,7 +219,7 @@ def verificarMacroX(lista_simbolos):
 
 
 # Função que ve as proximas 20 figuras na lista e retorna true se existirem 9 cruzes
-def verificarMacroCruz(lista_simbolos):
+def verificarMacroCruz():
     temp = lista_simbolos[20:]
     if temp.count(cruz) >= 9:
         print("Macro Cruz")
@@ -224,7 +229,7 @@ def verificarMacroCruz(lista_simbolos):
 
 
 # Função que ve as proximas 20 figuras na lista e retorna true se existirem 8 bolas
-def verificarMacroBola(lista_simbolos):
+def verificarMacroBola():
     temp = lista_simbolos[20:]
     if temp.count(bola) >= 8:
         print("Macro Bola")
@@ -234,7 +239,7 @@ def verificarMacroBola(lista_simbolos):
 
 
 # Função que ve as proximas 20 figuras na lista e retorna true se existirem 3 tracos
-def verificarMacroTraco(lista_simbolos):
+def verificarMacroTraco():
     temp = lista_simbolos[20:]
     if temp.count(traco) >= 3:
         print("Macro Traco")
@@ -325,54 +330,57 @@ def verifica_existencia_micro_traco(tabuleiro_temp):
 #--------------------------------------------------------------------------------------------------------
 # Função que verifica se existe uma macrofigura x no tabuleiro
 def verifica_existencia_macro_x(tabuleiro_temp):
-    temp_posicao = posicoes_x[0]
+    temp_posicao = posicoes_x[:1]
 
-    num_correspondecias = 0
-    for posicao in temp_posicao:
-        if tabuleiro_temp[posicao[0]][posicao[1]] == x:
-            num_correspondecias += 1
-        else:
-            break
-    
-        if num_correspondecias == 9:
-            print("Existe Macro X")
-            return True
+    for lista_posicao in temp_posicao:
+        num_correspondecias = 0
+        for posicao in lista_posicao:
+            if tabuleiro_temp[posicao[0]][posicao[1]] == x:
+                num_correspondecias += 1
+            else:
+                break
+        
+            if num_correspondecias == 9:
+                print("Existe X")
+                return True
 
     return False
 
 
 # Função que verifica se existe uma macrofigura cruz no tabuleiro
 def verifica_existencia_macro_cruz(tabuleiro_temp):
-    temp_posicao = posicoes_cruz[0]
+    temp_posicao = posicoes_cruz[:1]
 
-    num_correspondecias = 0
-    for posicao in temp_posicao:
-        if tabuleiro_temp[posicao[0]][posicao[1]] == cruz:
-            num_correspondecias += 1
-        else:
-            break
-    
-        if num_correspondecias == 9:
-            print("Existe Macro Cruz")
-            return True
+    for lista_posicao in temp_posicao:
+        num_correspondecias = 0
+        for posicao in lista_posicao:
+            if tabuleiro_temp[posicao[0]][posicao[1]] == cruz:
+                num_correspondecias += 1
+            else:
+                break
+        
+            if num_correspondecias == 9:
+                print("Existe Cruz")
+                return True
 
     return False
 
 
 # Função que verifica se existe uma macrofigura bola no tabuleiro
 def verifica_existencia_macro_bola(tabuleiro_temp):
-    temp_posicao = posicoes_bola[:9]
+    temp_posicao = posicoes_cruz[:9]
 
-    num_correspondecias = 0
-    for posicao in temp_posicao:
-        if tabuleiro_temp[posicao[0]][posicao[1]] == bola:
-            num_correspondecias += 1
-        else:
-            break
-    
-        if num_correspondecias == 8:
-            print("Existe Macro Bola")
-            return True
+    for lista_posicao in temp_posicao:
+        num_correspondecias = 0
+        for posicao in lista_posicao:
+            if tabuleiro_temp[posicao[0]][posicao[1]] == bola:
+                num_correspondecias += 1
+            else:
+                break
+        
+            if num_correspondecias == 8:
+                print("Existe bola")
+                return True
 
     return False
 
@@ -381,16 +389,17 @@ def verifica_existencia_macro_bola(tabuleiro_temp):
 def verifica_existencia_macro_traco(tabuleiro_temp):
     temp_posicao = posicoes_traco[:15]
 
-    num_correspondecias = 0
-    for posicao in temp_posicao:
-        if tabuleiro_temp[posicao[0]][posicao[1]] == traco:
-            num_correspondecias += 1
-        else:
-            break
-    
-        if num_correspondecias == 3:
-            print("Existe Macro Traco")
-            return True
+    for lista_posicao in temp_posicao:
+        num_correspondecias = 0
+        for posicao in lista_posicao:
+            if tabuleiro_temp[posicao[0]][posicao[1]] == traco:
+                num_correspondecias += 1
+            else:
+                break
+        
+            if num_correspondecias == 3:
+                print("Existe traco")
+                return True
 
     return False
 #--------------------------------------------------------------------------------------------------------
@@ -609,42 +618,105 @@ def limparMicroFigura(figura, tabuleiro_temp):
     for posicao in temp_posicao:
         tabuleiro_temp[posicao[0]][posicao[1]] = " "
 
+
+# Função para copiar tabuleiro
+def copiarTabuleiro(tabuleiro_temp):
+    tabuleiro_copia = [linha[:] for linha in tabuleiro_temp]
+    return tabuleiro_copia
+
+
+# Função para copiar lista
+def copiarLista(lista_temp):
+    lista_copia = []
+    for i in lista_temp:
+        lista_copia.append(i)
+    return lista_copia
 # --------------------------------------------------------------------------------------------------------
 
 
 
 # Itera pelas posições possiveis da figura a procura da melhor jogada
 def procurarJogadas():
-    tabuleiro_temp = tabuleiro.copy() # Tabuleiro original
-    lista_simbolos_temp = lista_simbolos[:profundidade] # Lista de simbolos original
-
-    lista_tabelas = [] # Lista que vai conter tabelas necessarias para a procura de jogadas
-    lista_jogadas = [] # Lista que vai conter todas as combinações de jogadas já testadas
+    camada_temporaria = []
+    posicoes_temp = []
     
+    lista_simbolos_temp = copiarLista(lista_simbolos)
+    primeira_camada = get_best_moves(lista_simbolos_temp[0], tabuleiro)
+    segunda_camada = []
+    terceira_camada = []
+    
+    for jogada in primeira_camada:
+        segunda_camada.append(get_best_moves(lista_simbolos_temp[1], jogada[1]))
+
+    # Somar os scores das jogadas da segunda camada com as da primeira camada,
+    # guardar os 30 melhores scores, tabuleiros e posicoes (da primeira e segunda camada)
+    for i, jogada in enumerate(segunda_camada):
+        for j in jogada:
+            score = primeira_camada[i][0] + j[0]
+            tabuleiros = j[1]
+            posicoes_temp.append(primeira_camada[i][2])
+            posicoes_temp.append(j[2])
+            camada_temporaria.append((score, tabuleiros, posicoes_temp))
+            posicoes_temp = []
+
+    # Ordenar array por score
+    camada_temporaria.sort(key=lambda tup: tup[0], reverse=True)
+    segunda_camada = camada_temporaria[:30]
+    
+    # Iterar pelas jogadas da segunda camada e procurar as melhores jogadas para a terceira camada
+    for jogada in segunda_camada:
+        terceira_camada.append(get_best_moves(lista_simbolos_temp[2], jogada[1]))
+    
+    # Somar os scores das jogadas da terceira camada com as da segunda camada,
+    # retornar as posições do melhor score
+    camada_temporaria = []
+    for i, jogada in enumerate(terceira_camada):
+        for j in jogada:
+            score = segunda_camada[i][0] + j[0]
+            tabuleiros = j[1]
+
+            for c in segunda_camada[i][2]:
+                posicoes_temp.append(c)
+
+            posicoes_temp.append(j[2])
+            camada_temporaria.append((score, tabuleiros, posicoes_temp))
+            posicoes_temp = []
+
+    # Ordenar array por score
+    camada_temporaria.sort(key=lambda tup: tup[0], reverse=True)
+
+    terceira_camada = camada_temporaria[:1]
+
+    print(terceira_camada)
+    return terceira_camada[0][2]
 
 
-# Retorna as 10 melhores jogadas, com os seus tabuleiros e scores
+
+
+
+# Retorna as 10 melhores jogadas para uma camada de profundidade
 def get_best_moves(simbolo, tabuleiro):
     score_array = []
     tabuleiro_array = []
     posicao_array = []
     moves_array = []
 
-    for linha in tabuleiro:
-        for celula in linha:
-            if celula == " ":
-                posicao = (tabuleiro.index(linha), linha.index(celula))
+    for i in range(5):
+        for l in range(5):
+            if tabuleiro[i][l] == " ":
+                posicao = (i, l)
                 score, tabuleiro_temp = calculate_score(simbolo, tabuleiro, posicao)
                 score_array.append(score)
                 tabuleiro_array.append(tabuleiro_temp)
                 posicao_array.append(posicao)
 
-    # For the 10 best scores, put them with the corresponding tabuleiro and posicao in the moves_array
-    for _ in range(10):
-        max_score = max(score_array)
-        index = score_array.index(max_score)
-        moves_array.append((max_score, tabuleiro_array[index], posicao_array[index]))
-        score_array.remove(max_score)
+    for i, score in enumerate(score_array):
+        moves_array.append((score, tabuleiro_array[i], posicao_array[i]))
+
+    # Ordenar array por score
+    moves_array.sort(key=lambda tup: tup[0], reverse=True)
+
+    moves_array = moves_array[:10]
     
     return moves_array
                 
@@ -655,12 +727,8 @@ def get_best_moves(simbolo, tabuleiro):
 # Calcular score da jogada (esta tabuleiro já possui a peça colocada)
 def calculate_score(figura, tabuleiro, posicao):
     score = 0
-    tabuleiro_temp = tabuleiro.copy()
+    tabuleiro_temp = copiarTabuleiro(tabuleiro)
     tabuleiro_temp[posicao[0]][posicao[1]] = figura
-
-    # Faço uma copia da lista de figuras para poder remover a figura que foi colocada
-    temp_lista_figuras = figuras.copy()
-    temp_lista_figuras.remove(figura)
 
 
     # Verifica se formou uma macrofigura, ou microfigura
@@ -689,26 +757,26 @@ def calculate_score(figura, tabuleiro, posicao):
 
     
     # Se colocou uma peça ao lado de outra diferente diminiu o score por 4
-    if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 1][posicao[1]] != figura:
-        score -= 4
+    #if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 1][posicao[1]] != figura:
+    #    score -= 4
     
     # Se colocou uma peça a distancia de 2 de outra diferente diminiu o score por 3
-    if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 2][posicao[1]] != figura:
-        score -= 3
+    #if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 2][posicao[1]] != figura:
+    #    score -= 3
     
     # Se colocou uma peça a distancia de 3 de outra diferente diminiu o score por 1
-    if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 3][posicao[1]] != figura:
-        score -= 1
+    #if posicao[0] != 0 and tabuleiro_temp[posicao[0] - 3][posicao[1]] != figura:
+    #    score -= 1
 
 
     # Verifica se o tabuleiro possui celulas vazias, tabuleiro é array de array, caso não exista nenhum -1000
     for linha in tabuleiro_temp:
         for celula in linha:
             if celula == " ":
-                break
-        else:
-            score -= 1000
-            break
+                return score, tabuleiro_temp
+        
+        score -= 1000
+        break
 
 
     return score, tabuleiro_temp
@@ -717,6 +785,64 @@ def calculate_score(figura, tabuleiro, posicao):
 
 # Função que será responsável por fazer as jogadas no array proximas_jogadas
 def jogar():
+    jogadas = []
+    global possivel_macro_cruz
+    global possivel_macro_x
+    global possivel_macro_bola
+    global possivel_macro_traco
+    global resultado_jogo
+
+    possivel_macro_cruz = verificarMacroCruz()
+    possivel_macro_x = verificarMacroX()
+    possivel_macro_bola = verificarMacroBola()
+    possivel_macro_traco = verificarMacroTraco()
+
+    while len(lista_simbolos) > 0:
+        jogadas = procurarJogadas()
+
+        # Colocar jogadas no tabueleiro
+        for i, jogada in enumerate(jogadas):
+            tabuleiro[jogada[0]][jogada[1]] = lista_simbolos[i]
+
+            # Verificar se formou uma macrofigura
+            if(verificar_macrofiguras(lista_simbolos[i], tabuleiro)):
+                limparMacroFigura(lista_simbolos[i], tabuleiro)
+                print("Formou macrofigura")
+
+                if lista_simbolos[i] == x:
+                    resultado_jogo += score_macro_x
+                    possivel_macro_x = False
+                elif lista_simbolos[i] == cruz:
+                    resultado_jogo += score_macro_cruz
+                    possivel_macro_cruz = False
+                elif lista_simbolos[i] == bola:
+                    resultado_jogo += score_macro_bola
+                    possivel_macro_bola = False
+                elif lista_simbolos[i] == traco:
+                    resultado_jogo += score_macro_traco
+                    possivel_macro_traco = False
+
+            # Verificar se formou uma microfigura
+            if(verificar_microfiguras(lista_simbolos[i], tabuleiro)):
+                limparMicroFigura(lista_simbolos[i], tabuleiro)
+                print("Formou microfigura")
+
+                if lista_simbolos[i] == x:
+                    resultado_jogo += score_micro_x
+                elif lista_simbolos[i] == cruz:
+                    resultado_jogo += score_micro_cruz
+                elif lista_simbolos[i] == bola:
+                    resultado_jogo += score_micro_bola
+                elif lista_simbolos[i] == traco:
+                    resultado_jogo += score_micro_traco
+                
+                possivel_macro_cruz = verificarMacroCruz()
+                possivel_macro_x = verificarMacroX()
+                possivel_macro_bola = verificarMacroBola()
+                possivel_macro_traco = verificarMacroTraco()
+
+
+            lista_simbolos.pop(i)
     return
 
 
@@ -734,14 +860,14 @@ def gerarFilaRandom(lista_simbolos):
 
 # Função para retirar o score das pecas ainda no tabuleiro
 def calcularScoreFinal():
-    global score
+    global resultado_jogo
     numeroPecasRestantes = 0
     for linha in tabuleiro:
         for celula in linha:
             if celula != " ":
                 numeroPecasRestantes += 1
 
-    score -= 2**numeroPecasRestantes
+    resultado_jogo -= 2**numeroPecasRestantes
 
 
 # Função para exibir o tabuleiro
