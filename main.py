@@ -8,13 +8,8 @@ class Simbolo:
         self.fimMacroX = False
         self.inicioMacroCruz = False
         self.fimMacroCruz = False
-
-    def __str__(self):
-        return (
-            f"Valor: {self.value}, "
-            f"Inicio Macrofigura: {self.inicioMacroX}, "
-            f"Fim Macrofigura: {self.fimMacroX}"
-        )
+        self.inicioMacroBola = False
+        self.fimMacroBola = False
     
 
 modo_macro_x = False  # Define se o modo macro_x está ativo ou não
@@ -50,6 +45,7 @@ score_micro_cruz = 32  # score por completar uma cruz
 score_micro_traco = 4  # score por completar um traco
 score_macro_x = 512  # score para completar macro x
 score_macro_cruz = 512  # score para completar macro cruz
+score_macro_bola = 256  # score para completar macro bola
 
 
 # define simbolos a utilizar
@@ -69,6 +65,7 @@ micro_forma_traco = 2
 # define tamanho das macrofiguras
 macro_forma_x = 9
 macro_forma_cruz = 9
+macro_forma_bola = 8
 
 
 # Criar um tabuleiro vazio
@@ -98,6 +95,12 @@ posicoes_NoConflictX_cruz = [(2, 3), (3, 2), (3, 4), (4, 3), (3, 3)]
 posicoes_NoConflictCruz_x = [(0, 0), (1, 1), (0, 2), (2, 0), (2, 2)]
 posicoes_NoConflictCruz_traco = [(0, 4), (1, 4)]
 
+
+# Posições no conflict caso macrobola
+posicoes_NoConflictBola_x = [(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]
+posicoes_NoConflictBola_cruz = [(2, 3), (3, 3), (3, 4), (4, 3), (3, 2)]
+
+
 # Posicoes caso macrox
 posicoes_macrox_x = [
     (0, 0),
@@ -123,6 +126,17 @@ posicoes_macro_cruz = [
     (2, 2)
 ]
 
+posicoes_macro_bola = [
+    (4, 0),
+    (4, 1),
+    (4, 2),
+    (3, 0),
+    (2, 1),
+    (2, 2),
+    (2, 0),
+    (3, 2)
+]
+
 
 
 # Definição de funções
@@ -145,8 +159,11 @@ def main():
         modo_macro_x = False
 
         gerarFilaRandom(lista_simbolos)
+        
         if(not verifica_possiblidade_macrocruz(0)):
-            verifica_possiblidade_macrox(0)
+            if(not verifica_possiblidade_macrox(0)):
+                verifica_possiblidade_macrobola(0)
+        
         jogar()
         calcularScoreFinal()
         calcular_estatisticas()
@@ -172,6 +189,48 @@ def conta_pecas_tabuleiro(simbolo):
     return simbolos_tabuleiro
 
 
+# Função responsavel por verificar se não existira interferencia entre a formação do simbolo bola e do macro_x
+def condicao_x_macroBola(num_x_tabuleiro, array_bola, array_x):
+    continue_loop = True
+
+    if len(array_x) > 0:
+        contador_x_antes_espaco_critico = 0
+        contador_x_depois_espaco_critico = 0
+
+        # verifica antes do espaço critico quantas x tem
+        while array_bola[4] > array_x[contador_x_antes_espaco_critico]:
+            contador_x_antes_espaco_critico += 1
+            # caso não existam mais x para verificar
+            if (contador_x_antes_espaco_critico) == len(array_x):
+                continue_loop = False
+                break
+
+        if (contador_x_antes_espaco_critico + num_x_tabuleiro) % 5 > 3:
+            return False
+
+        # verifica se depois de entrar no espaço critico as x vão ultrapassar o limite
+        if continue_loop:
+            while (
+                array_bola[7]
+                > array_x[contador_x_antes_espaco_critico + contador_x_depois_espaco_critico]
+            ):
+                contador_x_depois_espaco_critico += 1
+                # caso não existam mais x para verificar
+                if (
+                    contador_x_antes_espaco_critico + contador_x_depois_espaco_critico
+                ) == (len(array_x)):
+                    break
+
+        if (
+            ((contador_x_antes_espaco_critico + num_x_tabuleiro) % 5)
+            + contador_x_depois_espaco_critico
+        ) > 3:
+            return False
+        
+    return True
+
+
+# Função responsavel por verificar se não existira interferencia entre a formação do simbolo x e do macro_cruz
 def condicao_x_macroCruz(num_x_tabuleiro, array_cruz, array_x):
     continue_loop = True
 
@@ -212,7 +271,6 @@ def condicao_x_macroCruz(num_x_tabuleiro, array_cruz, array_x):
             return False
         
     return True
-
 
 
 # Função responsavel por verificar se não existira interferencia entre a formação do simbolo bola e do macro_x
@@ -260,6 +318,31 @@ def condição_bola_macroX(num_bolas_tabuleiro, array_x, array_bola):
     return True
 
 
+# Função que verifica se é possível ou não fazer uma macrofigura bola, recebe o número de bolas atualmente no tabuleiro
+def verifica_possiblidade_macrobola(num_bolas_tabuleiro):
+    global modo_macro_bola
+    array_bola = []
+    array_x = []
+
+    for index, i in enumerate(lista_simbolos):
+        if i.value == bola:
+            array_bola.append(index)
+        elif i.value == x:
+            array_x.append(index)
+
+    while len(array_bola) >= 8:
+        if condicao_x_macroBola(num_bolas_tabuleiro, array_bola, array_x):
+            lista_simbolos[array_bola[0]].inicioMacroBola = True
+            lista_simbolos[array_bola[7]].fimMacroBola = True
+            modo_macro_bola = True
+            return True
+        else:
+            array_bola = array_bola[4:]
+    
+    return False
+
+
+# Função que verifica se é possível ou não fazer uma macrofigura cruz, recebe o número de x atualmente no tabuleiro
 def verifica_possiblidade_macrocruz(num_x_tabuleiro):
     global modo_macro_cruz
     array_cruz = []
@@ -281,7 +364,6 @@ def verifica_possiblidade_macrocruz(num_x_tabuleiro):
             array_cruz = array_cruz[5:]
     
     return False
-
 
 
 # Função que verifica se é possível ou não fazer uma macrofigura x, recebe o número de bolas atualmente no tabuleiro
@@ -342,6 +424,7 @@ def jogar():
 
     micro_x_permitido = True  # Define se existe um macro_x a ser formado ou não
     micro_cruz_permitido = True  # Define se existe um macro_cruz a ser formado ou não
+    micro_bola_permitido = True  # Define se existe um macro_bola a ser formado ou não
 
 
     if(modo_macro_x):
@@ -354,6 +437,11 @@ def jogar():
         copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
         copiar_valores_array(posicoes_base_cruz, posicao_cruz_uso)
         copiar_valores_array(posicoes_NoConflictCruz_traco, posicao_traco_uso)
+    elif(modo_macro_bola):
+        copiar_valores_array(posicoes_NoConflictBola_x, posicao_x_uso)
+        copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
+        copiar_valores_array(posicoes_NoConflictBola_cruz, posicao_cruz_uso)
+        copiar_valores_array(posicoes_base_traco, posicao_traco_uso)
     else:
         copiar_valores_array(posicoes_base_x, posicao_x_uso) 
         copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
@@ -368,9 +456,16 @@ def jogar():
             micro_x_permitido = False
             copiar_valores_array(posicoes_macrox_x, posicao_x_uso)
         
+        # Caso detete o inicio do macro_cruz
         if lista_simbolos[0].inicioMacroCruz:
             micro_cruz_permitido = False
             copiar_valores_array(posicoes_macro_cruz, posicao_cruz_uso)
+        
+        # Caso detete o inicio do macro_bola
+        if lista_simbolos[0].inicioMacroBola:
+            micro_bola_permitido = False
+            copiar_valores_array(posicoes_macro_bola, posicao_bola_uso)
+
 
         # procedimento para colocar a peça no tabuleiro
         if lista_simbolos[0].value == x:  # No caso de ser um X
@@ -429,16 +524,20 @@ def jogar():
         if lista_simbolos[0].fimMacroCruz:  # Caso chegue ao fim da macrofigura
             micro_cruz_permitido = True
             copiar_valores_array(posicoes_base_cruz, posicao_cruz_uso)
+        
+        if lista_simbolos[0].fimMacroBola:  # Caso chegue ao fim da macrofigura
+            micro_bola_permitido = True
+            copiar_valores_array(posicoes_base_bola, posicao_bola_uso)
 
 
         lista_simbolos.pop(0)
-        verifica_existencia_figura(contador_tabuleiro, tabuleiro, micro_x_permitido, micro_cruz_permitido)
+        verifica_existencia_figura(contador_tabuleiro, tabuleiro, micro_x_permitido, micro_cruz_permitido, micro_bola_permitido)
 
 
 # Função que verifica se existe uma figura completa no tabueiro
 # Caso exista, limpa as posições do tabueiro que foram usadas
 # e adiciona o score a que corresponde
-def verifica_existencia_figura(lista_contadores, tabuleiro, run_micro_x, run_micro_cruz):
+def verifica_existencia_figura(lista_contadores, tabuleiro, run_micro_x, run_micro_cruz, run_micro_bola):
     global score
 
     # Caso em que existe macrofigura x no tabueiro
@@ -481,8 +580,29 @@ def verifica_existencia_figura(lista_contadores, tabuleiro, run_micro_x, run_mic
             ] = " "
 
 
+    # Caso em que existe uma macrofigura bola no tabuleiro
+    if lista_contadores[1] == macro_forma_bola:
+        score += score_macro_bola
+        while lista_contadores[1] != 0:
+            lista_contadores[1] -= 1
+
+            if (
+                tabuleiro[(posicoes_macro_bola[lista_contadores[1]][0])][
+                    (posicoes_macro_bola[lista_contadores[1]][1])
+                ]
+                != bola
+            ):
+                exit(erro_limpeza_bola)
+
+            tabuleiro[(posicoes_macro_bola[lista_contadores[1]][0])][
+                (posicoes_macro_bola[lista_contadores[1]][1])
+            ] = " "
+
+        num_x_tabuleiro = conta_pecas_tabuleiro(x)
+        verifica_possiblidade_macrobola(num_x_tabuleiro)
+
     # Caso em que existe uma microfigura bola no tabuleiro
-    if lista_contadores[1] == micro_forma_0:
+    elif lista_contadores[1] == micro_forma_0 and run_micro_bola:
         score += score_micro_bola
         while lista_contadores[1] != 0:
             lista_contadores[1] -= 1
