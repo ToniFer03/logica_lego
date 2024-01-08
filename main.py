@@ -1,6 +1,6 @@
 import random
 import math
-import pickle # Para guardar os pesos
+import json
 from datetime import datetime
 
 # Variables
@@ -298,6 +298,11 @@ def verifica_existencia_macro_traco(tabuleiro_temp):
 
 
 def verificar_microfiguras(figura, tabuleiro_temp):
+    global micro_x_formados
+    global micro_cruz_formados
+    global micro_bola_formados
+    global micro_traco_formados
+
     temp_posicao = []
     temp_score = 0
     num_correspondecias = 0
@@ -393,6 +398,11 @@ def verificar_microfiguras(figura, tabuleiro_temp):
 
 # Função que retorna se formou uma macrofigura
 def verificar_macrofiguras(figura, tabuleiro_temp):
+    global macro_x_formados
+    global macro_cruz_formados
+    global macro_bola_formados
+    global macro_traco_formados
+
     temp_posicao = []
     temp_score = 0
     num_correspondecias = 0
@@ -713,6 +723,10 @@ def update_weights_based_on_score(score):
 
 
 
+current_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+file_path = f'{current_date}.txt'
+
+
 def main():
     global tabuleiro
     global lista_simbolos
@@ -724,38 +738,49 @@ def main():
     global micro_cruz_formados
     global micro_bola_formados
     global micro_traco_formados
+    global input_data
+    global weights_input_hidden1
+    global biases_hidden1
+    global weights_hidden1_hidden2
+    global biases_hidden2
+    global weights_hidden2_hidden3
+    global biases_hidden3
+    global weights_hidden3_output
+    global biases_output
+    global best_score
+
 
     all_iterations_data = []
     i = 0
-    while i < 10000:
+    while i < 100:
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerar_fila_simbolos()
         score = simulate_game()
-        print("Score: " + str(score))
         train_neural_network(score)
 
-        data = {
-        'macro_x_formados': macro_x_formados,
-        'macro_cruz_formados': macro_cruz_formados,
-        'macro_bola_formados': macro_bola_formados,
-        'macro_traco_formados': macro_traco_formados,
-        'micro_x_formados': micro_x_formados,
-        'micro_cruz_formados': micro_cruz_formados,
-        'micro_bola_formados': micro_bola_formados,
-        'micro_traco_formados': micro_traco_formados,
-        # ... (other variables)
-        
-        'weights_input_hidden1': weights_input_hidden1,
-        'biases_hidden1': biases_hidden1,
-        'weights_hidden1_hidden2': weights_hidden1_hidden2,
-        'biases_hidden2': biases_hidden2,
-        'weights_hidden2_hidden3': weights_hidden2_hidden3,
-        'biases_hidden3': biases_hidden3,
-        'weights_hidden3_output': weights_hidden3_output,
-        'biases_output': biases_output,
-        # ... (other global variables)
-        }
-        all_iterations_data.append(data)
+        if (score > 0):
+            data = {
+            'macro_x_formados': macro_x_formados,
+            'macro_cruz_formados': macro_cruz_formados,
+            'macro_bola_formados': macro_bola_formados,
+            'macro_traco_formados': macro_traco_formados,
+            'micro_x_formados': micro_x_formados,
+            'micro_cruz_formados': micro_cruz_formados,
+            'micro_bola_formados': micro_bola_formados,
+            'micro_traco_formados': micro_traco_formados,
+            'score': score,
+            'best_score': best_score,
+            'weights_input_hidden1': weights_input_hidden1,
+            'biases_hidden1': biases_hidden1,
+            'weights_hidden1_hidden2': weights_hidden1_hidden2,
+            'biases_hidden2': biases_hidden2,
+            'weights_hidden2_hidden3': weights_hidden2_hidden3,
+            'biases_hidden3': biases_hidden3,
+            'weights_hidden3_output': weights_hidden3_output,
+            'biases_output': biases_output,
+            # ... (other global variables)
+            }
+            all_iterations_data.append(data)
 
         macro_x_formados = 0
         macro_cruz_formados = 0
@@ -767,13 +792,13 @@ def main():
         micro_traco_formados = 0
         i += 1
 
-    # Get the current date and time
-    current_date = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-
-    # Save all iterations to a file with the current date in the filename
-    with open(f'iterations_data_{current_date}.pkl', 'wb') as file:
-        pickle.dump(all_iterations_data, file)
     
+    for iteration_data in all_iterations_data:
+        # Save data to the file
+        with open(file_path, 'a') as file:
+            json.dump(iteration_data, file)
+            file.write('\n')  # Add a newline for better readability between iterations
+
     return 0
 
 
