@@ -3,6 +3,13 @@ import math
 import json
 from datetime import datetime
 
+# Specify the file path to load weights from
+file_path = 'load_1.json'
+keystoload = ['weights_input_hidden1',
+              'weights_hidden1_hidden2',
+              'weights_hidden2_hidden3',
+              'weights_hidden3_output']
+
 # Variables
 lista_simbolos = []
 simbolos_disponiveis = ['X', 'O', '+', '-']
@@ -37,13 +44,6 @@ macro_cruz_formados = 0
 macro_bola_formados = 0
 macro_traco_formados = 0
 
-# Specify the file path to load from
-file_path = 'load_1.json'
-keystoload = ['weights_input_hidden1',
-              'weights_hidden1_hidden2',
-              'weights_hidden2_hidden3',
-              'weights_hidden3_output']
-
 # Open the file and load JSON data
 with open(file_path, 'r') as file:
     loaded_data = json.load(file)
@@ -53,20 +53,20 @@ filtered_data = {key: loaded_data[key] for key in keystoload}
 
 
 # Initialize weights and biases for each layer
-#weights_input_hidden1 = [[random.random() for _ in range(hidden_size_1)] for _ in range(input_size)]
-weights_input_hidden1 = filtered_data['weights_input_hidden1']
+weights_input_hidden1 = [[random.random() for _ in range(hidden_size_1)] for _ in range(input_size)]
+#weights_input_hidden1 = filtered_data['weights_input_hidden1']
 biases_hidden1 = [0.5] * hidden_size_1
 
-#weights_hidden1_hidden2 = [[random.random() for _ in range(hidden_size_2)] for _ in range(hidden_size_1)]
-weights_hidden1_hidden2 = filtered_data['weights_hidden1_hidden2']
+weights_hidden1_hidden2 = [[random.random() for _ in range(hidden_size_2)] for _ in range(hidden_size_1)]
+#weights_hidden1_hidden2 = filtered_data['weights_hidden1_hidden2']
 biases_hidden2 = [0.5] * hidden_size_2
 
-#weights_hidden2_hidden3 = [[random.random() for _ in range(hidden_size_3)] for _ in range(hidden_size_2)]
-weights_hidden2_hidden3 = filtered_data['weights_hidden2_hidden3']
+weights_hidden2_hidden3 = [[random.random() for _ in range(hidden_size_3)] for _ in range(hidden_size_2)]
+#weights_hidden2_hidden3 = filtered_data['weights_hidden2_hidden3']
 biases_hidden3 = [0.5] * hidden_size_3
 
-#weights_hidden3_output = [[random.random() for _ in range(output_size)] for _ in range(hidden_size_3)]
-weights_hidden3_output = filtered_data['weights_hidden3_output']
+weights_hidden3_output = [[random.random() for _ in range(output_size)] for _ in range(hidden_size_3)]
+#weights_hidden3_output = filtered_data['weights_hidden3_output']
 biases_output = [0.5] * output_size
 
 
@@ -695,6 +695,7 @@ def simulate_game():
 
 # Define a function to train the neural network based on the total reward obtained during the episode
 def train_neural_network(score):
+    global all_scores
     global best_score
     global weights_input_hidden1
     global biases_hidden1
@@ -708,7 +709,8 @@ def train_neural_network(score):
     if score > best_score:
         # If the current score is better than the best score, update the best score and the weights
         best_score = score
-        update_weights_based_on_score(score)
+    
+    update_weights_based_on_score(score)
 
 
 def update_weights_based_on_score(score):
@@ -722,8 +724,10 @@ def update_weights_based_on_score(score):
     global weights_hidden3_output
     global biases_output
 
-
-    learning_rate_multiplier = 1.2 if score > best_score else 0.8
+    # Calculate the threshold for the top 10% scores
+    top_10_threshold = sorted(all_scores)[-int(0.1 * len(all_scores))]
+    
+    learning_rate_multiplier = random.uniform(1.05, 1.25) if score >= top_10_threshold else random.uniform(0.80, 0.95)
 
     # Update weights and biases with the learning rate multiplier
     weights_input_hidden1 = [[w * learning_rate_multiplier for w in weights_input_hidden1_row] for weights_input_hidden1_row in weights_input_hidden1]
@@ -747,6 +751,7 @@ file_path = f'{current_date}.txt'
 def main():
     global tabuleiro
     global lista_simbolos
+    global all_scores
     global macro_x_formados
     global macro_cruz_formados
     global macro_bola_formados
@@ -773,8 +778,10 @@ def main():
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerar_fila_simbolos()
         score = simulate_game()
+        all_scores.append(score)
 
-        if (score > 64):
+        if (score >= 32):
+            print(f'Iteration {i} - Score: {score}')
             data = {
             'macro_x_formados': macro_x_formados,
             'macro_cruz_formados': macro_cruz_formados,
