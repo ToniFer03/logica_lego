@@ -255,7 +255,6 @@ def update_bias_output(gradients, learning_rate=0.01):
         biases_output[i] -= learning_rate * gradients[i]
 
 
-
 def load_training_data():
     global training_inputs
     global training_targets
@@ -266,7 +265,6 @@ def load_training_data():
     # Extract inputs and targets from the list of objects
     training_inputs = [obj['inputs'] for obj in training_data_list]
     training_targets = [obj['targets'] for obj in training_data_list]
-
 
 
 
