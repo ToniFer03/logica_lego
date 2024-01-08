@@ -37,19 +37,36 @@ macro_cruz_formados = 0
 macro_bola_formados = 0
 macro_traco_formados = 0
 
+# Specify the file path to load from
+file_path = 'load_1.json'
+keystoload = ['weights_input_hidden1',
+              'weights_hidden1_hidden2',
+              'weights_hidden2_hidden3',
+              'weights_hidden3_output']
+
+# Open the file and load JSON data
+with open(file_path, 'r') as file:
+    loaded_data = json.load(file)
+
+# Create a new dictionary with only the selected keys
+filtered_data = {key: loaded_data[key] for key in keystoload}
+
 
 # Initialize weights and biases for each layer
-random.seed(80)
-weights_input_hidden1 = [[random.random() for _ in range(hidden_size_1)] for _ in range(input_size)]
+#weights_input_hidden1 = [[random.random() for _ in range(hidden_size_1)] for _ in range(input_size)]
+weights_input_hidden1 = filtered_data['weights_input_hidden1']
 biases_hidden1 = [0.5] * hidden_size_1
 
-weights_hidden1_hidden2 = [[random.random() for _ in range(hidden_size_2)] for _ in range(hidden_size_1)]
+#weights_hidden1_hidden2 = [[random.random() for _ in range(hidden_size_2)] for _ in range(hidden_size_1)]
+weights_hidden1_hidden2 = filtered_data['weights_hidden1_hidden2']
 biases_hidden2 = [0.5] * hidden_size_2
 
-weights_hidden2_hidden3 = [[random.random() for _ in range(hidden_size_3)] for _ in range(hidden_size_2)]
+#weights_hidden2_hidden3 = [[random.random() for _ in range(hidden_size_3)] for _ in range(hidden_size_2)]
+weights_hidden2_hidden3 = filtered_data['weights_hidden2_hidden3']
 biases_hidden3 = [0.5] * hidden_size_3
 
-weights_hidden3_output = [[random.random() for _ in range(output_size)] for _ in range(hidden_size_3)]
+#weights_hidden3_output = [[random.random() for _ in range(output_size)] for _ in range(hidden_size_3)]
+weights_hidden3_output = filtered_data['weights_hidden3_output']
 biases_output = [0.5] * output_size
 
 
@@ -752,13 +769,12 @@ def main():
 
     all_iterations_data = []
     i = 0
-    while i < 100:
+    while i < 10000:
         tabuleiro = [[" " for _ in range(5)] for _ in range(5)]
         gerar_fila_simbolos()
         score = simulate_game()
-        train_neural_network(score)
 
-        if (score > 0):
+        if (score > 64):
             data = {
             'macro_x_formados': macro_x_formados,
             'macro_cruz_formados': macro_cruz_formados,
@@ -778,9 +794,10 @@ def main():
             'biases_hidden3': biases_hidden3,
             'weights_hidden3_output': weights_hidden3_output,
             'biases_output': biases_output,
-            # ... (other global variables)
             }
             all_iterations_data.append(data)
+        
+        train_neural_network(score)
 
         macro_x_formados = 0
         macro_cruz_formados = 0
